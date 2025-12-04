@@ -1,0 +1,1659 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>库存预警配置 · 原型</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+
+/* 管理区域树布局 */
+.region-layout {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.region-tree-panel {
+  flex: 1;
+  padding-right: 16px;
+  border-right: 1px solid #e5e7eb;
+}
+
+.region-summary-panel {
+  width: 260px;
+  min-width: 220px;
+  padding-left: 12px;
+}
+
+.region-summary-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.region-summary-content {
+  font-size: 12px;
+  color: #4b5563;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  max-height: 200px;
+  overflow: auto;
+  line-height: 1.7;
+}
+
+/* 树形结构 */
+.region-tree {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  padding: 6px 10px 8px;
+  max-height: 230px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.region-tree ul {
+  list-style: none;
+  padding-left: 14px;
+}
+
+.region-tree > ul {
+  padding-left: 0;
+}
+
+.region-node {
+  display: flex;
+  align-items: center;
+  margin: 2px 0;
+}
+
+.region-toggle {
+  width: 14px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  color: #9ca3af;
+}
+
+.region-toggle.empty {
+  visibility: hidden;
+}
+
+.region-checkbox {
+  margin: 0 4px 0 2px;
+}
+
+.region-label {
+  cursor: pointer;
+  color: #374151;
+}
+
+.region-node[data-level="city"] .region-label {
+  font-weight: 500;
+}
+
+.region-node[data-level="province"] .region-label {
+  font-weight: 600;
+}
+
+/* 小屏时上下布局 */
+@media (max-width: 960px) {
+  .region-layout {
+    flex-direction: column;
+  }
+  .region-tree-panel {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+  }
+  .region-summary-panel {
+    width: 100%;
+    padding-left: 0;
+  }
+}
+
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+      padding: 20px;
+    }
+
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+      padding: 18px 22px 24px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .page-desc {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: center;
+      padding: 14px 16px 10px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 14px;
+    }
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      min-width: 240px;
+    }
+
+    .filter-label {
+      width: 72px;
+      font-size: 13px;
+      color: #4b5563;
+      text-align: right;
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+
+    .filter-input,
+    .filter-select {
+      flex: 1;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+      color: #111827;
+      background-color: #fff;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    .filter-range {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .filter-range input {
+      flex: 1;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+    }
+
+    .filter-range span {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      height: 30px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: #e5e7eb;
+      color: #111827;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+
+    .btn-primary::before {
+      content: "+";
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      color: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .btn-sm {
+      height: 26px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+    }
+
+    .table-wrapper {
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th,
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      font-weight: 600;
+      color: #4b5563;
+      height: 38px;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    .col-index {
+      width: 52px;
+      text-align: center;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 10px;
+      height: 22px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-enabled {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .status-disabled {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .op-link {
+      font-size: 12px;
+      color: #2563eb;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    .op-link.danger {
+      color: #ef4444;
+    }
+
+    .op-link:last-child {
+      margin-right: 0;
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: 40px 0;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #6b7280;
+      background: #f9fafb;
+    }
+
+    .page-size {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-size select {
+      height: 26px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      padding: 0 6px;
+      font-size: 12px;
+    }
+
+    .page-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn,
+    .page-number {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #ffffff;
+    }
+
+    .page-number.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+
+    .page-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 980px;
+      width: 100%;
+      max-height: 86vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+    }
+
+    .modal-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+
+    .modal-body {
+      padding: 12px 18px 10px;
+      overflow: auto;
+    }
+
+    .modal-footer {
+      padding: 10px 18px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-item {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .form-label {
+      font-size: 13px;
+      color: #4b5563;
+      margin-bottom: 4px;
+    }
+
+    .form-control,
+    .form-select {
+      width: 100%;
+      height: 30px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      padding: 0 8px;
+      font-size: 13px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .category-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .category-table th,
+    .category-table td {
+      border-bottom: 1px solid #e5e7eb;
+      border-right: 1px solid #e5e7eb;
+      padding: 6px 8px;
+      white-space: nowrap;
+    }
+
+    .category-table th:last-child,
+    .category-table td:last-child {
+      border-right: none;
+    }
+
+    .category-table thead {
+      background: #f9fafb;
+    }
+
+    .category-select {
+      height: 26px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      padding: 0 6px;
+      font-size: 12px;
+    }
+
+    .category-input {
+      width: 80px;
+      height: 26px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      padding: 0 6px;
+      font-size: 12px;
+    }
+
+    .readonly-field {
+      background: #f9fafb;
+    }
+
+    /* 详情头部信息区（红框部分） */
+.detail-header {
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 10px 16px 8px;
+  margin-bottom: 12px;
+}
+
+.detail-header-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  column-gap: 32px;
+  row-gap: 6px;
+  align-items: center;
+}
+
+.detail-item {
+  display: flex;
+  align-items: baseline;
+  font-size: 12px;
+}
+
+.detail-label {
+  color: #9ca3af;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.detail-value {
+  color: #111827;
+  white-space: nowrap;
+}
+
+/* 小屏自动两列 */
+@media (max-width: 960px) {
+  .detail-grid {
+    grid-template-columns: repeat(2, auto);
+  }
+}
+
+
+
+    @media (max-width: 960px) {
+      .filter-item { min-width: 100%; }
+      .page { padding: 14px 12px 18px; }
+      .modal { margin: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">库存预警配置</div>
+        <div class="page-desc">
+          按“地市 + 区县 + 终端类别”维度配置库存预警阈值（单位：天），并在预警报表中标识安全库存是否达标。
+        </div>
+      </div>
+    </div>
+
+    <!-- 查询条件 -->
+    <div class="filter-bar">
+      <div class="filter-item">
+        <div class="filter-label">地市：</div>
+        <select id="filterCity" class="filter-select">
+          <option value="">全部</option>
+          <option>成都市</option>
+          <option>资阳市</option>
+          <option>达州市</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <div class="filter-label">区县：</div>
+        <select id="filterCounty" class="filter-select">
+          <option value="">全部</option>
+          <option>武侯区</option>
+          <option>锦江区</option>
+          <option>宣汉县</option>
+          <option>通川区</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <div class="filter-label">终端类别：</div>
+        <select id="filterCategory" class="filter-select">
+          <option value="">全部</option>
+          <option>光猫（非万兆）</option>
+          <option>万兆光猫</option>
+          <option>机顶盒</option>
+          <option>一体机</option>
+          <option>路由器</option>
+          <option>FTTR主网关</option>
+          <option>FTTR从网关</option>
+          <option>枪机</option>
+          <option>球机</option>
+          <option>吊舱机</option>
+          <option>移动看家枪机</option>
+          <option>移动看家球机</option>
+          <option>移动看家吊舱机</option>
+          <option>移动看家AI摄像头</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <div class="filter-label">启用状态：</div>
+        <select id="filterStatus" class="filter-select">
+          <option value="">全部</option>
+          <option value="enabled">启用</option>
+          <option value="disabled">禁用</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <div class="filter-label">创建时间：</div>
+        <div class="filter-range">
+          <input id="filterStartTime" type="text" placeholder="开始时间" />
+          <span>—</span>
+          <input id="filterEndTime" type="text" placeholder="结束时间" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+      <button class="btn btn-primary" id="btnAdd">新增配置</button>
+      <button class="btn" id="btnSearch">查询</button>
+      <button class="btn btn-outline" id="btnExport">导出</button>
+    </div>
+
+    <!-- 列表 -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-index">序号</th>
+            <th>地市</th>
+            <th>区县</th>
+            <th>终端类别</th>
+            <th>类别启用状态</th>
+            <th>启用状态</th>
+            <th>创建人</th>
+            <th>创建时间</th>
+            <th>更新人</th>
+            <th>更新时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="configTableBody">
+          <!-- JS 渲染 -->
+        </tbody>
+      </table>
+
+      <div id="emptyTip" class="table-empty" style="display:none;">
+        暂无符合条件的预警配置，请调整查询条件后重试。
+      </div>
+    </div>
+
+    <!-- 分页（此处仅原型展示，未做真实分页逻辑） -->
+    <div class="pagination">
+      <div class="page-size">
+        共 <span id="totalCount">0</span> 条记录，每页
+        <select>
+          <option>10条/页</option>
+          <option>20条/页</option>
+          <option>50条/页</option>
+        </select>
+      </div>
+      <div class="page-controls">
+        <div class="page-btn disabled">«</div>
+        <div class="page-number active">1</div>
+        <div class="page-btn disabled">»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增 / 编辑 预警配置弹窗 -->
+  <div class="modal-backdrop" id="configModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="configModalTitle">新增预警配置</div>
+        <button class="modal-close" data-close="configModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="configForm">
+        <form id="configForm">
+  <!-- 管理区域树 -->
+  <div class="region-layout">
+    <div class="region-tree-panel">
+      <div class="form-label" style="margin-bottom: 6px;">管理区域：</div>
+      <div id="regionTree" class="region-tree"></div>
+      <div class="form-hint" style="margin-top: 6px;">
+        支持按省 / 地市 / 区县勾选，多选区域将批量应用相同的终端阈值配置。
+      </div>
+    </div>
+    <div class="region-summary-panel">
+      <div class="region-summary-title">已选区域</div>
+      <div id="regionSummary" class="region-summary-content">
+        暂未选择区域
+      </div>
+    </div>
+  </div>
+
+
+          <div style="margin-top:10px; font-size:13px; font-weight:600;">
+            终端类别阈值配置（单位：天）
+          </div>
+          <div class="form-hint">
+            每个终端类别配置一个预警阈值，取值范围 1~30，默认 7 天；类别启用状态为“禁用”时，该类别不参与库存预警计算。
+          </div>
+
+          <table class="category-table" style="margin-top:6px;">
+            <thead>
+              <tr>
+                <th style="width:40px;">序号</th>
+                <th style="width:140px;">终端类别</th>
+                <th style="width:110px;">类别启用状态</th>
+                <th style="width:120px;">预警阈值（天）</th>
+              </tr>
+            </thead>
+            <tbody id="categoryTbody">
+              <!-- JS 渲染 14 类 -->
+            </tbody>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" type="button" data-close="configModal">取消</button>
+        <button class="btn btn-primary btn-sm" type="button" id="btnSaveConfig">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 详情弹窗 -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">预警配置详情</div>
+        <button class="modal-close" data-close="detailModal">&times;</button>
+      </div>
+      <div class="modal-body" id="detailBody">
+        <!-- JS 写入详情内容 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" type="button" data-close="detailModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  
+  <script>
+    // ========= 数据模型 =========
+    const TERMINAL_CATEGORIES = [
+      "光猫（非万兆）",
+      "万兆光猫",
+      "机顶盒",
+      "一体机",
+      "路由器",
+      "FTTR主网关",
+      "FTTR从网关",
+      "枪机",
+      "球机",
+      "吊舱机",
+      "移动看家枪机",
+      "移动看家球机",
+      "移动看家吊舱机",
+      "移动看家AI摄像头"
+    ];
+
+    // 管理区域树：省 -> 地市 -> 区县
+const REGION_TREE = [
+  {
+    level: "province",
+    name: "四川省",
+    children: [
+      {
+        level: "city",
+        name: "成都市",
+        children: [
+          { level: "county", name: "武侯区" },
+          { level: "county", name: "锦江区" }
+        ]
+      },
+      {
+        level: "city",
+        name: "资阳市",
+        children: [
+          { level: "county", name: "资阳市" }
+        ]
+      },
+      {
+        level: "city",
+        name: "达州市",
+        children: [
+          { level: "county", name: "宣汉县" },
+          { level: "county", name: "通川区" }
+        ]
+      }
+    ]
+  }
+];
+
+// 递归渲染树
+function renderRegionTree() {
+  const container = document.getElementById("regionTree");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const rootUl = document.createElement("ul");
+
+  function createNode(node) {
+    const li = document.createElement("li");
+
+    const row = document.createElement("div");
+    row.className = "region-node";
+    row.dataset.level = node.level;
+    row.dataset.name = node.name;
+
+    const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+
+    const toggle = document.createElement("span");
+    toggle.className = "region-toggle" + (hasChildren ? "" : " empty");
+    toggle.textContent = hasChildren ? "▸" : "";
+    row.appendChild(toggle);
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "region-checkbox";
+    row.appendChild(checkbox);
+
+    const label = document.createElement("span");
+    label.className = "region-label";
+    label.textContent = node.name;
+    row.appendChild(label);
+
+    li.appendChild(row);
+
+    if (hasChildren) {
+      const childUl = document.createElement("ul");
+      childUl.style.display = "none";
+      node.children.forEach(child => {
+        childUl.appendChild(createNode(child));
+      });
+      li.appendChild(childUl);
+
+      toggle.addEventListener("click", () => {
+        const isOpen = childUl.style.display !== "none";
+        childUl.style.display = isOpen ? "none" : "block";
+        toggle.textContent = isOpen ? "▸" : "▾";
+      });
+    }
+
+    // 勾选联动子节点
+    checkbox.addEventListener("change", () => {
+      if (hasChildren) {
+        const childCheckboxes = li.querySelectorAll("ul .region-checkbox");
+        childCheckboxes.forEach(cb => (cb.checked = checkbox.checked));
+      }
+      updateRegionSummary();
+    });
+
+    label.addEventListener("click", () => {
+      checkbox.checked = !checkbox.checked;
+      checkbox.dispatchEvent(new Event("change"));
+    });
+
+    return li;
+  }
+
+  REGION_TREE.forEach(node => rootUl.appendChild(createNode(node)));
+  container.appendChild(rootUl);
+  updateRegionSummary();
+}
+
+// 获取勾选结果：返回 { cities:[], counties:[] }
+function getSelectedRegions() {
+  const allNodes = document.querySelectorAll("#regionTree .region-node");
+  const selectedCounties = [];
+  const citiesSet = new Set();
+
+  allNodes.forEach(node => {
+    const checkbox = node.querySelector(".region-checkbox");
+    if (!checkbox || !checkbox.checked) return;
+
+    const level = node.dataset.level;
+    const name = node.dataset.name;
+
+    if (level === "county") {
+      selectedCounties.push(name);
+      // 找所属地市
+      let parent = node.parentElement;
+      while (parent && !parent.classList.contains("region-node")) {
+        parent = parent.parentElement;
+      }
+    } else if (level === "city") {
+      citiesSet.add(name);
+      // 城市选中时，其下所有区县视为选中
+      const counties = node.parentElement.querySelectorAll(
+        'div.region-node[data-level="county"]'
+      );
+      counties.forEach(cn => {
+        const cName = cn.dataset.name;
+        if (!selectedCounties.includes(cName)) {
+          selectedCounties.push(cName);
+        }
+      });
+    }
+  });
+
+  // 根据县名再补齐所属城市
+  const allCityNodes = document.querySelectorAll(
+    '#regionTree .region-node[data-level="city"]'
+  );
+  selectedCounties.forEach(countyName => {
+    allCityNodes.forEach(cityNode => {
+      const cityName = cityNode.dataset.name;
+      const countyNodes = cityNode.parentElement.querySelectorAll(
+        'div.region-node[data-level="county"]'
+      );
+      countyNodes.forEach(cn => {
+        if (cn.dataset.name === countyName) {
+          citiesSet.add(cityName);
+        }
+      });
+    });
+  });
+
+  return {
+    cities: Array.from(citiesSet),
+    counties: selectedCounties
+  };
+}
+
+// 根据 cities / counties 回显树勾选状态（编辑时用）
+function setRegionSelection(cities, counties) {
+  const allCheckboxes = document.querySelectorAll(
+    "#regionTree .region-node .region-checkbox"
+  );
+  allCheckboxes.forEach(cb => (cb.checked = false));
+
+  const allNodes = document.querySelectorAll("#regionTree .region-node");
+
+  // 先按区县勾选
+  counties.forEach(countyName => {
+    allNodes.forEach(node => {
+      if (node.dataset.level === "county" && node.dataset.name === countyName) {
+        const cb = node.querySelector(".region-checkbox");
+        if (cb) cb.checked = true;
+      }
+    });
+  });
+
+  // 如果只有城市信息，也勾选城市（以及其下所有区县）
+  cities.forEach(cityName => {
+    const cityNode = Array.from(allNodes).find(
+      n => n.dataset.level === "city" && n.dataset.name === cityName
+    );
+    if (cityNode) {
+      const cb = cityNode.querySelector(".region-checkbox");
+      if (cb) {
+        cb.checked = true;
+        cb.dispatchEvent(new Event("change"));
+      }
+    }
+  });
+
+  updateRegionSummary();
+}
+
+// 已选区域摘要
+function updateRegionSummary() {
+  const summaryEl = document.getElementById("regionSummary");
+  if (!summaryEl) return;
+
+  const { cities, counties } = getSelectedRegions();
+  if (!cities.length && !counties.length) {
+    summaryEl.textContent = "暂未选择区域";
+    return;
+  }
+
+  const lines = [];
+  lines.push("地市：" + (cities.length ? cities.join("、") : "未选择"));
+  lines.push("区县：" + (counties.length ? counties.join("、") : "未选择"));
+
+  summaryEl.innerHTML = lines.join("<br />");
+}
+
+
+    let configs = []; // 存储所有预警配置
+    let filteredConfigs = []; // 当前筛选结果
+    let currentMode = "add"; // add | edit
+    let editingId = null;
+
+    // 初始模拟数据
+    function createMockData() {
+      const now = new Date();
+      const baseCategories = TERMINAL_CATEGORIES.map(name => ({
+        name,
+        enabled: true,
+        threshold: 7
+      }));
+
+      configs = [
+        {
+          id: 1,
+          cities: ["资阳市"],
+          counties: ["资阳市"],
+          categories: baseCategories.map(c => ({ ...c })),
+          status: "disabled",
+          createUser: "zj_admin",
+          createTime: "2025-09-08 15:19:21",
+          updateUser: "zj_admin",
+          updateTime: "2025-09-08 15:19:21"
+        },
+        {
+          id: 2,
+          cities: ["达州市"],
+          counties: ["宣汉县"],
+          categories: baseCategories.map((c, idx) => ({
+            ...c,
+            enabled: idx < 12 // 前12类启用，后2类禁用
+          })),
+          status: "enabled",
+          createUser: "dx_admin",
+          createTime: "2025-09-08 15:18:21",
+          updateUser: "dx_admin",
+          updateTime: "2025-09-09 10:02:10"
+        },
+        {
+          id: 3,
+          cities: ["达州市"],
+          counties: ["通川区"],
+          categories: baseCategories.map((c, idx) => ({
+            ...c,
+            enabled: idx < 8
+          })),
+          status: "enabled",
+          createUser: "tc_admin",
+          createTime: "2025-08-31 11:01:16",
+          updateUser: "tc_admin",
+          updateTime: "2025-09-01 09:15:43"
+        }
+      ];
+    }
+
+    // ========= 工具函数 =========
+    function formatCategorySummary(categories) {
+      const enabledCount = categories.filter(c => c.enabled).length;
+      const disabledCount = categories.length - enabledCount;
+
+      let summary;
+      if (enabledCount === 14) {
+        summary = "14类启用";
+      } else if (disabledCount === 14) {
+        summary = "14类禁用";
+      } else {
+        summary = `${enabledCount}类启用/${disabledCount}类禁用`;
+      }
+
+      return summary;
+    }
+
+    function formatCategoryNames(categories) {
+      const names = categories
+        .filter(c => c.enabled)
+        .map(c => c.name);
+      const display = names.length > 0 ? names : categories.map(c => c.name);
+      if (display.length > 5) {
+        return display.slice(0, 5).join("、") + "…";
+      }
+      return display.join("、");
+    }
+
+    function formatDateTime(dt = new Date()) {
+      const pad = n => (n < 10 ? "0" + n : "" + n);
+      const y = dt.getFullYear();
+      const m = pad(dt.getMonth() + 1);
+      const d = pad(dt.getDate());
+      const h = pad(dt.getHours());
+      const mi = pad(dt.getMinutes());
+      const s = pad(dt.getSeconds());
+      return `${y}-${m}-${d} ${h}:${mi}:${s}`;
+    }
+
+    function getSelectedValues(select) {
+      return Array.from(select.selectedOptions).map(o => o.value);
+    }
+
+    // ========= 列表渲染 & 查询 =========
+    function applyFilter() {
+      const city = document.getElementById("filterCity").value;
+      const county = document.getElementById("filterCounty").value;
+      const category = document.getElementById("filterCategory").value;
+      const status = document.getElementById("filterStatus").value;
+
+      filteredConfigs = configs.filter(c => {
+        if (city && !c.cities.includes(city)) return false;
+        if (county && !c.counties.includes(county)) return false;
+        if (status && c.status !== status) return false;
+        if (category) {
+          const hasCat = c.categories.some(cat => cat.name === category);
+          if (!hasCat) return false;
+        }
+        return true;
+      });
+
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("configTableBody");
+      tbody.innerHTML = "";
+
+      if (!filteredConfigs.length) {
+        document.getElementById("emptyTip").style.display = "block";
+      } else {
+        document.getElementById("emptyTip").style.display = "none";
+      }
+
+      filteredConfigs.forEach((c, idx) => {
+        const tr = document.createElement("tr");
+
+        const tdIndex = document.createElement("td");
+        tdIndex.className = "col-index";
+        tdIndex.textContent = idx + 1;
+        tr.appendChild(tdIndex);
+
+        const tdCity = document.createElement("td");
+        tdCity.textContent = c.cities.join("、");
+        tr.appendChild(tdCity);
+
+        const tdCounty = document.createElement("td");
+        tdCounty.textContent = c.counties.join("、");
+        tr.appendChild(tdCounty);
+
+        const tdCatNames = document.createElement("td");
+        tdCatNames.textContent = formatCategoryNames(c.categories);
+        tr.appendChild(tdCatNames);
+
+        const tdStatusSummary = document.createElement("td");
+        tdStatusSummary.textContent = formatCategorySummary(c.categories);
+        tr.appendChild(tdStatusSummary);
+
+        const tdStatus = document.createElement("td");
+        const span = document.createElement("span");
+        span.className =
+          "status-tag " +
+          (c.status === "enabled" ? "status-enabled" : "status-disabled");
+        span.textContent = c.status === "enabled" ? "启用" : "禁用";
+        tdStatus.appendChild(span);
+        tr.appendChild(tdStatus);
+
+        const tdCreateUser = document.createElement("td");
+        tdCreateUser.textContent = c.createUser;
+        tr.appendChild(tdCreateUser);
+
+        const tdCreateTime = document.createElement("td");
+        tdCreateTime.textContent = c.createTime;
+        tr.appendChild(tdCreateTime);
+
+        const tdUpdateUser = document.createElement("td");
+        tdUpdateUser.textContent = c.updateUser;
+        tr.appendChild(tdUpdateUser);
+
+        const tdUpdateTime = document.createElement("td");
+        tdUpdateTime.textContent = c.updateTime;
+        tr.appendChild(tdUpdateTime);
+
+        const tdOps = document.createElement("td");
+
+        const toggleLink = document.createElement("span");
+        toggleLink.className = "op-link";
+        toggleLink.textContent = c.status === "enabled" ? "禁用" : "启用";
+        toggleLink.onclick = () => toggleStatus(c.id);
+        tdOps.appendChild(toggleLink);
+
+        const editLink = document.createElement("span");
+        editLink.className = "op-link";
+        editLink.textContent = "编辑";
+        editLink.onclick = () => openEditModal(c.id);
+        tdOps.appendChild(editLink);
+
+        const deleteLink = document.createElement("span");
+        deleteLink.className = "op-link danger";
+        deleteLink.textContent = "删除";
+        deleteLink.onclick = () => deleteConfig(c.id);
+        tdOps.appendChild(deleteLink);
+
+        const detailLink = document.createElement("span");
+        detailLink.className = "op-link";
+        detailLink.textContent = "查看详情";
+        detailLink.onclick = () => openDetailModal(c.id);
+        tdOps.appendChild(detailLink);
+
+        tr.appendChild(tdOps);
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("totalCount").textContent = filteredConfigs.length;
+    }
+
+    // ========= Modal 显示/关闭 =========
+    function openModal(id) {
+      document.getElementById(id).classList.add("visible");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("visible");
+    }
+
+    document.querySelectorAll("[data-close]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-close");
+        closeModal(id);
+      });
+    });
+
+    // ========= 新增 / 编辑 =========
+    function renderCategoryRows(defaultData = null) {
+      const tbody = document.getElementById("categoryTbody");
+      tbody.innerHTML = "";
+      TERMINAL_CATEGORIES.forEach((name, idx) => {
+        const rowData =
+          defaultData && defaultData[idx]
+            ? defaultData[idx]
+            : { name, enabled: true, threshold: 7 };
+
+        const tr = document.createElement("tr");
+
+        const tdIndex = document.createElement("td");
+        tdIndex.textContent = idx + 1;
+        tr.appendChild(tdIndex);
+
+        const tdName = document.createElement("td");
+        tdName.textContent = name;
+        tr.appendChild(tdName);
+
+        const tdStatus = document.createElement("td");
+        const sel = document.createElement("select");
+        sel.className = "category-select";
+        sel.innerHTML =
+          '<option value="enabled">启用</option><option value="disabled">禁用</option>';
+        sel.value = rowData.enabled ? "enabled" : "disabled";
+        tdStatus.appendChild(sel);
+        tr.appendChild(tdStatus);
+
+        const tdThreshold = document.createElement("td");
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "1";
+        input.max = "30";
+        input.value = rowData.threshold;
+        input.className = "category-input";
+        tdThreshold.appendChild(input);
+        tr.appendChild(tdThreshold);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+   function openAddModal() {
+  currentMode = "add";
+  editingId = null;
+  document.getElementById("configModalTitle").textContent = "新增预警配置";
+
+  // 清空区域树勾选
+  setRegionSelection([], []);
+
+  renderCategoryRows();
+  openModal("configModal");
+}
+
+
+   function openEditModal(id) {
+  currentMode = "edit";
+  editingId = id;
+  const config = configs.find(c => c.id === id);
+  if (!config) return;
+
+  document.getElementById("configModalTitle").textContent = "编辑预警配置";
+
+  // 回显管理区域
+  setRegionSelection(config.cities || [], config.counties || []);
+
+  const catData = TERMINAL_CATEGORIES.map(name => {
+    const matched = config.categories.find(c => c.name === name);
+    return (
+      matched || {
+        name,
+        enabled: true,
+        threshold: 7
+      }
+    );
+  });
+
+  renderCategoryRows(catData);
+  openModal("configModal");
+}
+
+
+    function collectFormData() {
+  // 从区域树中获取勾选结果
+  const region = getSelectedRegions();
+  const cities = region.cities;
+  const counties = region.counties;
+
+  if (!cities.length) {
+    alert("请在左侧管理区域树中至少选择一个地市或区县");
+    return null;
+  }
+  if (!counties.length) {
+    alert("请在左侧管理区域树中至少选择一个区县");
+    return null;
+  }
+
+  const catRows = Array.from(
+    document.querySelectorAll("#categoryTbody tr")
+  );
+
+  const categories = [];
+  for (let i = 0; i < catRows.length; i++) {
+    const row = catRows[i];
+    const name = TERMINAL_CATEGORIES[i];
+    const sel = row.querySelector("select");
+    const input = row.querySelector("input");
+    const value = input.value.trim();
+
+    const threshold = Number(value);
+    if (!value || isNaN(threshold) || threshold < 1 || threshold > 30) {
+      alert("请为【" + name + "】填写 1~30 之间的有效天数");
+      return null;
+    }
+
+    categories.push({
+      name,
+      enabled: sel.value === "enabled",
+      threshold
+    });
+  }
+
+  return { cities, counties, categories };
+}
+
+
+    function saveConfig() {
+      const data = collectFormData();
+      if (!data) return;
+
+      const nowStr = formatDateTime(new Date());
+
+      // 简化：仅判断第一地市 + 第一区县是否已有配置
+      const mainCity = data.cities[0];
+      const mainCounty = data.counties[0];
+
+      let existing = configs.find(
+        c =>
+          c.cities[0] === mainCity &&
+          c.counties[0] === mainCounty &&
+          (currentMode === "add" || c.id !== editingId)
+      );
+
+      if (existing) {
+        const msg =
+          mainCity +
+          mainCounty +
+          "的部分终端类别已存在库存预警配置，是否按照最新配置进行重置？";
+        if (!confirm(msg)) {
+          return;
+        }
+      }
+
+      if (currentMode === "add") {
+        const newId =
+          configs.length > 0
+            ? Math.max(...configs.map(c => c.id)) + 1
+            : 1;
+
+        const newConfig = {
+          id: newId,
+          cities: data.cities,
+          counties: data.counties,
+          categories: data.categories,
+          status: "enabled",
+          createUser: "current_user",
+          createTime: nowStr,
+          updateUser: "current_user",
+          updateTime: nowStr
+        };
+
+        configs.push(newConfig);
+      } else if (currentMode === "edit") {
+        const config = configs.find(c => c.id === editingId);
+        if (!config) return;
+
+        // 判断是否存在从启用改为禁用的类别
+        const beforeEnabledMap = {};
+        config.categories.forEach(c => {
+          beforeEnabledMap[c.name] = c.enabled;
+        });
+
+        const disabledNew = data.categories.filter(
+          c => !c.enabled && beforeEnabledMap[c.name] !== false
+        );
+
+        if (disabledNew.length > 0) {
+          const msg =
+            "确定禁用 " +
+            disabledNew.length +
+            " 类终端的预警配置？禁用后将不再参与预警计算。";
+          if (!confirm(msg)) {
+            return;
+          }
+        }
+
+        config.cities = data.cities;
+        config.counties = data.counties;
+        config.categories = data.categories;
+        config.updateUser = "current_user";
+        config.updateTime = nowStr;
+      }
+
+      closeModal("configModal");
+      applyFilter();
+    }
+
+    // ========= 启用 / 禁用 / 删除 =========
+    function toggleStatus(id) {
+      const config = configs.find(c => c.id === id);
+      if (!config) return;
+
+      if (config.status === "enabled") {
+        const msg =
+          "确定禁用该终端的预警配置？禁用后将不再参与预警计算。";
+        if (!confirm(msg)) return;
+        config.status = "disabled";
+      } else {
+        // 禁用 -> 启用，直接启用
+        config.status = "enabled";
+      }
+
+      config.updateUser = "current_user";
+      config.updateTime = formatDateTime(new Date());
+      applyFilter();
+    }
+
+    function deleteConfig(id) {
+      const config = configs.find(c => c.id === id);
+      if (!config) return;
+
+      if (config.status !== "disabled") {
+        alert("请先将该区县的全部预警配置禁用后再删除。");
+        return;
+      }
+
+      const name =
+        config.cities.join("、") + config.counties.join("、");
+
+      const msg =
+        "确定删除【" +
+        name +
+        "】全部预警配置？此操作不可恢复，且将导致不再参与库存预警计算。";
+
+      if (!confirm(msg)) return;
+
+      configs = configs.filter(c => c.id !== id);
+      applyFilter();
+    }
+
+    // ========= 详情 =========
+    
+    // ========= 详情 =========
+function openDetailModal(id) {
+  const config = configs.find(c => c.id === id);
+  if (!config) return;
+
+  const container = document.getElementById("detailBody");
+  container.innerHTML = "";
+
+  // 头部信息（红框区）
+  const header = document.createElement("div");
+  header.className = "detail-header";
+  header.innerHTML = `
+    <div class="detail-header-title">预警配置基本信息</div>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">地市：</span>
+        <span class="detail-value">${config.cities.join("、")}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">区县：</span>
+        <span class="detail-value">${config.counties.join("、")}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">类别启用状态：</span>
+        <span class="detail-value">${formatCategorySummary(config.categories)}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">启用状态：</span>
+        <span class="detail-value">${config.status === "enabled" ? "启用" : "禁用"}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">创建人：</span>
+        <span class="detail-value">${config.createUser}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">创建时间：</span>
+        <span class="detail-value">${config.createTime}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">更新人：</span>
+        <span class="detail-value">${config.updateUser}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">更新时间：</span>
+        <span class="detail-value">${config.updateTime}</span>
+      </div>
+    </div>
+  `;
+  container.appendChild(header);
+
+  // 标题：终端类别明细
+  const title = document.createElement("div");
+  title.style.fontSize = "13px";
+  title.style.fontWeight = "600";
+  title.style.margin = "4px 0 4px";
+  title.textContent = "终端类别阈值明细";
+  container.appendChild(title);
+
+  // 明细表格保持原样
+  const table = document.createElement("table");
+  table.className = "category-table readonly-field";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th style="width:40px;">序号</th>
+        <th style="width:140px;">终端类别</th>
+        <th style="width:110px;">类别启用状态</th>
+        <th style="width:120px;">预警阈值（天）</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+  const tbody = table.querySelector("tbody");
+
+  TERMINAL_CATEGORIES.forEach((name, idx) => {
+    const rowData =
+      config.categories.find(c => c.name === name) || {
+        name,
+        enabled: false,
+        threshold: "-"
+      };
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td>${name}</td>
+      <td>${rowData.enabled ? "启用" : "禁用"}</td>
+      <td>${rowData.threshold}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  container.appendChild(table);
+  openModal("detailModal");
+}
+
+
+    // ========= 事件绑定 =========
+    document.getElementById("btnAdd").addEventListener("click", openAddModal);
+    document
+      .getElementById("btnSaveConfig")
+      .addEventListener("click", saveConfig);
+
+    document.getElementById("btnSearch").addEventListener("click", applyFilter);
+
+    document.getElementById("btnExport").addEventListener("click", () => {
+      alert("原型页面，导出功能仅为占位。实际系统中将按当前查询条件导出预警配置列表。");
+    });
+
+    // 初始化
+  createMockData();
+renderRegionTree();   // 渲染管理区域树
+renderCategoryRows(); // 以防首次打开弹窗前需要 DOM
+applyFilter();
+
+  </script>
+</body>
+</html>
