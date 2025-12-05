@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>AMS 家客终端管理 · 调拨出入库流程原型（扫码弹窗）</title>
+  <title>AMS 家客终端管理 · 调拨出入库 + 故障终端闭环管理</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       background: #f3f4f6;
     }
     body { display: flex; justify-content: center; align-items: center; padding: 16px; }
@@ -276,7 +277,6 @@
     .camera-summary-row span.key{color:#9ca3af;}
     .camera-summary-row span.val{color:#f9fafb;}
 
-    /* 串码信息比对区域样式优化 */
     .info-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -459,7 +459,6 @@
           </div>
         </div>
 
-        <!-- 基本信息 -->
         <div class="card">
           <div class="card-header">
             <span>订单基本信息</span>
@@ -497,7 +496,7 @@
           <div class="form-row">
             <div class="form-field">
               <label class="form-label">创建人 / 工号<span class="required">*</span></label>
-              <input id="fieldCreator" type="text" placeholder="如：张三 / 1008611" value="张三 / 1008611" />
+              <input id="fieldCreator" type="text" value="张三 / 1008611" />
             </div>
             <div class="form-field">
               <label class="form-label">联系电话</label>
@@ -519,7 +518,6 @@
           </div>
         </div>
 
-        <!-- 扫码入口 -->
         <div class="card">
           <div class="card-header">
             <span>扫码添加设备</span>
@@ -535,7 +533,6 @@
           </div>
         </div>
 
-        <!-- 设备清单 -->
         <div class="card">
           <div class="card-header">
             <span>本订单设备清单</span>
@@ -558,7 +555,6 @@
           </div>
         </div>
 
-        <!-- 审批 -->
         <div class="card">
           <div class="card-header">
             <span>审批与确认</span>
@@ -587,7 +583,172 @@
         </div>
       </section>
 
-      <!-- 列表视图 -->
+      <!-- 故障终端闭环管理 -->
+      <section id="view-fault" class="view">
+        <div class="card">
+          <div class="card-header">
+            <span>故障终端闭环管理</span>
+          </div>
+          <div class="card-subtitle">
+            支持在 APP 端创建故障问题工单，通过扫码关联终端设备，补充厂家、型号、入库时间及设备状态信息，录入故障类型、现象图片与使用情况描述，实现故障终端从发现到闭环的全流程管理。
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>1. 故障工单基本信息</span>
+            <span id="faultStatusBadge" class="badge-status badge-draft">草稿</span>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">故障来源<span class="required">*</span></label>
+              <select id="faultSource">
+                <option value="装维APP反馈">装维APP反馈</option>
+                <option value="客户投诉">客户投诉</option>
+                <option value="质检抽测">质检抽测</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">故障工单编号</label>
+              <input id="faultNo" type="text" placeholder="系统自动生成" disabled />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">所属地市<span class="required">*</span></label>
+              <input id="faultCity" type="text" value="内蒙古·呼和浩特市" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">所属区县<span class="required">*</span></label>
+              <input id="faultCounty" type="text" value="新城区" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">反馈人 / 工号<span class="required">*</span></label>
+              <input id="faultReporter" type="text" value="李四 / 1008622" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">联系电话</label>
+              <input id="faultPhone" type="text" placeholder="选填" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>2. 关联故障设备</span>
+            <span style="font-size:11px;color:#2563eb;">扫码关联 · 终端信息回填</span>
+          </div>
+          <div class="card-subtitle">
+            在故障问题反馈中点击【扫码关联设备】，通过摄像头识别终端串码，系统自动回填终端类型、厂家、型号、入库时间和设备状态等信息。
+          </div>
+
+          <div style="display:flex; gap:8px; margin-bottom:6px;">
+            <button id="btnOpenFaultScanModal" class="btn btn-primary">📷 扫码关联设备</button>
+            <button id="btnClearFaultDevice" class="btn btn-outline">清除关联设备</button>
+          </div>
+
+          <div class="info-grid">
+            <div>
+              <div class="info-item-label">设备识别码（串码）</div>
+              <div id="faultDevCode" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">系统 SN</div>
+              <div id="faultDevSn" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">终端类型</div>
+              <div id="faultDevType" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">厂家</div>
+              <div id="faultDevVendor" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">终端型号</div>
+              <div id="faultDevModel" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">入库时间</div>
+              <div id="faultDevInTime" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">设备状态</div>
+              <div id="faultDevStatus" class="info-item-value">-</div>
+            </div>
+            <div>
+              <div class="info-item-label">库存位置</div>
+              <div id="faultDevLocation" class="info-item-value">-</div>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:4px;">
+            ※ 设备信息基于内蒙古终端台账自动回填，可作为后续故障分析与闭环追踪的关键字段。
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>3. 故障详情信息</span>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">故障类型<span class="required">*</span></label>
+              <select id="faultType">
+                <option value="设备无法上电">设备无法上电</option>
+                <option value="WiFi信号异常">WiFi信号异常</option>
+                <option value="端口不可用">端口不可用</option>
+                <option value="频繁掉线">频繁掉线</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">故障等级</label>
+              <select id="faultLevel">
+                <option value="一般">一般</option>
+                <option value="重要">重要</option>
+                <option value="紧急">紧急</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field" style="margin-top:4px;">
+            <label class="form-label">故障现象描述<span class="required">*</span></label>
+            <textarea id="faultDesc" placeholder="如：上电后指示灯不亮，用户端无法拨号上网。"></textarea>
+          </div>
+          <div class="form-field" style="margin-top:4px;">
+            <label class="form-label">设备使用情况说明</label>
+            <textarea id="faultUsage" placeholder="如：设备已使用两年，近期出现间歇性掉线，用户反馈频繁重启可短暂恢复。"></textarea>
+          </div>
+          <div class="form-field" style="margin-top:4px;">
+            <label class="form-label">上传故障现象图片</label>
+            <input id="faultPhotos" type="file" accept="image/*" multiple />
+            <div class="hint">※ 可拍照上传指示灯状态、布线环境等图片，辅助后续复盘与责任界定。</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>4. 工单提交与闭环</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+            <button id="btnSaveFaultDraft" class="btn btn-primary">💾 保存/更新草稿</button>
+            <button id="btnClearFault" class="btn btn-outline">🗑 清空工单（删除草稿）</button>
+            <button id="btnSubmitFault" class="btn btn-danger">📨 提交生成故障工单</button>
+          </div>
+          <div class="hint">
+            ※ 工单未提交前可随时修改或删除详情数据；提交后生成正式故障工单，用于后续派单处理与闭环回访。
+          </div>
+
+          <div class="divider"></div>
+          <div class="card-subtitle">最近创建的故障工单</div>
+          <div id="faultList" style="font-size:11px;color:#9ca3af;">
+            暂无故障工单，请先在上方创建并提交。
+          </div>
+        </div>
+      </section>
+
+      <!-- 订单列表视图 -->
       <section id="view-orders" class="view">
         <div class="card">
           <div class="card-header">
@@ -609,18 +770,18 @@
             <span>我的（占位）</span>
           </div>
           <div style="font-size:12px;color:#6b7280;">
-            这里可扩展装维个人信息、默认调出/调入仓库、扫码偏好配置等内容，当前用于占位。
+            这里可扩展装维个人信息、默认调拨/故障偏好配置等内容，当前用于占位。
           </div>
         </div>
       </section>
     </main>
 
-    <!-- 扫码弹窗 -->
+    <!-- 通用扫码弹窗：调拨出入库 / 故障终端 共用 -->
     <div id="scanModal" class="modal-backdrop">
       <div class="modal-panel">
         <div class="modal-header">
           <div>
-            <div class="modal-title">扫码添加设备</div>
+            <div class="modal-title">扫码识别串码</div>
             <div class="modal-subtitle">多码识别 · 光标选项 · 串码比对</div>
           </div>
           <div id="btnCloseScanModal" class="modal-close">✕</div>
@@ -647,7 +808,7 @@
           <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
             <button id="btnOpenCamera" class="btn btn-primary">📷 打开摄像头</button>
             <button id="btnStopCamera" class="btn btn-ghost-dark btn" disabled>■ 关闭摄像头</button>
-           
+            <button id="btnMockScan" class="btn btn-ghost-dark btn">✨ 多码识别示例</button>
           </div>
 
           <div class="camera-summary">
@@ -684,13 +845,12 @@
           </div>
 
           <div class="hint" style="margin-top:4px;">
-            ※ 多码标签即为“光标选项”，点击某个串码后自动触发台账比对，并可加入本订单设备清单。
+            ※ 多码标签即为“光标选项”，点击某个串码后自动触发台账比对，可加入调拨订单或故障工单。
           </div>
         </div>
 
         <div class="divider"></div>
 
-        <!-- 串码信息比对 -->
         <div class="info-grid">
           <div>
             <div class="info-item-label">设备识别码（串码）</div>
@@ -719,8 +879,8 @@
         </div>
 
         <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
-          <button id="btnAddDevice" class="btn btn-primary">➕ 加入本订单设备清单</button>
-          <span class="hint">※ 支持扫码多台设备，逐台加入本订单。</span>
+          <button id="btnAddDevice" class="btn btn-primary">➕ 确认使用当前串码</button>
+          <span class="hint">※ 在当前场景中使用该串码，可写入调拨订单或故障工单。</span>
         </div>
       </div>
     </div>
@@ -730,6 +890,10 @@
       <div class="tab-item active" data-view="transfer">
         <span class="icon">🔁</span>
         <span>调拨出入库</span>
+      </div>
+      <div class="tab-item" data-view="fault">
+        <span class="icon">🛠</span>
+        <span>故障终端</span>
       </div>
       <div class="tab-item" data-view="orders">
         <span class="icon">📋</span>
@@ -743,10 +907,11 @@
   </div>
 
   <script>
-    // Tab 切换
+    // ============== Tab 切换 ==============
     const tabItems = document.querySelectorAll('.tab-item');
     const views = {
       transfer: document.getElementById('view-transfer'),
+      fault: document.getElementById('view-fault'),
       orders: document.getElementById('view-orders'),
       profile: document.getElementById('view-profile')
     };
@@ -754,20 +919,37 @@
     const headerSubTitle = document.getElementById('headerSubTitle');
 
     const headerTextMap = {
-      transfer: { title:'调拨出入库', sub:'订单创建 · 扫码添加 · 审批确认' },
-      orders: { title:'订单列表', sub:'查询历史调拨出入库订单' },
-      profile:{ title:'我的', sub:'装维信息与调拨偏好' }
+      transfer: {
+        title: '调拨出入库',
+        sub: '订单创建 · 扫码添加 · 审批确认'
+      },
+      fault: {
+        title: '故障终端闭环管理',
+        sub: '故障工单创建 · 扫码关联设备 · 闭环管理'
+      },
+      orders: {
+        title: '订单列表',
+        sub: '查询历史调拨出入库订单'
+      },
+      profile: {
+        title: '我的',
+        sub: '装维信息与偏好配置'
+      }
     };
 
-    tabItems.forEach(tab=>{
-      tab.addEventListener('click',()=>{
+    tabItems.forEach(tab => {
+      tab.addEventListener('click', () => {
         const viewKey = tab.getAttribute('data-view');
-        tabItems.forEach(t=>t.classList.remove('active'));
+
+        tabItems.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
 
-        Object.keys(views).forEach(key=>{
-          if(key===viewKey) views[key].classList.add('active','fade-in');
-          else views[key].classList.remove('active','fade-in');
+        Object.keys(views).forEach(key => {
+          if (key === viewKey) {
+            views[key].classList.add('active', 'fade-in');
+          } else {
+            views[key].classList.remove('active', 'fade-in');
+          }
         });
 
         headerTitle.textContent = headerTextMap[viewKey].title;
@@ -775,14 +957,15 @@
       });
     });
 
-    function setStepActive(step){
-      document.querySelectorAll('.step-item').forEach(el=>{
+    function setStepActive(step) {
+      document.querySelectorAll('.step-item').forEach(el => {
         const s = Number(el.getAttribute('data-step'));
-        if(s===step) el.classList.add('active');
+        if (s === step) el.classList.add('active');
         else el.classList.remove('active');
       });
     }
 
+    // ============== 调拨出入库数据模型 ==============
     const orderStatusBadge = document.getElementById('orderStatusBadge');
     const approveStatusBadge = document.getElementById('approveStatusBadge');
     const deviceCountSpan = document.getElementById('deviceCount');
@@ -808,71 +991,89 @@
     let currentOrder = null;
     let orderHistory = [];
 
-    function generateOrderNo(){
-      const now=new Date();
-      const y=now.getFullYear();
-      const m=String(now.getMonth()+1).padStart(2,'0');
-      const d=String(now.getDate()).padStart(2,'0');
-      const t=String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
-      return 'DBDD'+y+m+d+t;
+    function generateOrderNo() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const t = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+      return 'DBDD' + y + m + d + t;
     }
 
-    function setOrderStatus(status){
-      orderStatusBadge.textContent=status;
-      approveStatusBadge.textContent=status;
-      orderStatusBadge.className='badge-status';
-      approveStatusBadge.className='badge-status';
-      if(status==='草稿'){orderStatusBadge.classList.add('badge-draft');approveStatusBadge.classList.add('badge-draft');}
-      else if(status==='待审批'){orderStatusBadge.classList.add('badge-pending');approveStatusBadge.classList.add('badge-pending');}
-      else if(status==='已通过'){orderStatusBadge.classList.add('badge-pass');approveStatusBadge.classList.add('badge-pass');}
-      else if(status==='已驳回'){orderStatusBadge.classList.add('badge-reject');approveStatusBadge.classList.add('badge-reject');}
+    function generateFaultNo() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const t = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+      return 'GZGD' + y + m + d + t;
     }
 
-    function appendTimeline(text){
-      const item=document.createElement('div');
-      item.className='timeline-item';
-      const nowStr=new Date().toLocaleString();
-      item.textContent=nowStr+' - '+text;
+    function setOrderStatus(status) {
+      orderStatusBadge.textContent = status;
+      approveStatusBadge.textContent = status;
+      orderStatusBadge.className = 'badge-status';
+      approveStatusBadge.className = 'badge-status';
+      if (status === '草稿') {
+        orderStatusBadge.classList.add('badge-draft');
+        approveStatusBadge.classList.add('badge-draft');
+      } else if (status === '待审批') {
+        orderStatusBadge.classList.add('badge-pending');
+        approveStatusBadge.classList.add('badge-pending');
+      } else if (status === '已通过') {
+        orderStatusBadge.classList.add('badge-pass');
+        approveStatusBadge.classList.add('badge-pass');
+      } else if (status === '已驳回') {
+        orderStatusBadge.classList.add('badge-reject');
+        approveStatusBadge.classList.add('badge-reject');
+      }
+    }
+
+    function appendTimeline(text) {
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      const nowStr = new Date().toLocaleString();
+      item.textContent = nowStr + ' - ' + text;
       timelineEl.appendChild(item);
-      timelineEl.scrollTop=timelineEl.scrollHeight;
+      timelineEl.scrollTop = timelineEl.scrollHeight;
     }
 
-    function saveBasicInfo(){
-      const orderType=fieldOrderType.value;
-      const fromStore=fieldFromStore.value.trim();
-      const toStore  =fieldToStore.value.trim();
-      const creator  =fieldCreator.value.trim();
-      const phone    =fieldPhone.value.trim();
-      const remark   =fieldRemark.value.trim();
+    function saveBasicInfo() {
+      const orderType = fieldOrderType.value;
+      const fromStore = fieldFromStore.value.trim();
+      const toStore   = fieldToStore.value.trim();
+      const creator   = fieldCreator.value.trim();
+      const phone     = fieldPhone.value.trim();
+      const remark    = fieldRemark.value.trim();
 
-      if(!fromStore||!toStore||!creator){
+      if (!fromStore || !toStore || !creator) {
         alert('调出仓库、调入仓库、创建人/工号为必填项。');
         return;
       }
 
-      if(!currentOrder){
-        const orderNo=generateOrderNo();
-        fieldOrderNo.value=orderNo;
-        currentOrder={
+      if (!currentOrder) {
+        const orderNo = generateOrderNo();
+        fieldOrderNo.value = orderNo;
+        currentOrder = {
           orderNo,
-          type:orderType,
+          type: orderType,
           fromStore,
           toStore,
           creator,
           phone,
           remark,
-          devices:[],
-          status:'草稿',
-          createdAt:new Date().toISOString()
+          devices: [],
+          status: '草稿',
+          createdAt: new Date().toISOString()
         };
-        appendTimeline('创建订单草稿：'+orderNo);
-      }else{
-        currentOrder.type=orderType;
-        currentOrder.fromStore=fromStore;
-        currentOrder.toStore=toStore;
-        currentOrder.creator=creator;
-        currentOrder.phone=phone;
-        currentOrder.remark=remark;
+        appendTimeline('创建订单草稿：' + orderNo);
+      } else {
+        currentOrder.type = orderType;
+        currentOrder.fromStore = fromStore;
+        currentOrder.toStore = toStore;
+        currentOrder.creator = creator;
+        currentOrder.phone = phone;
+        currentOrder.remark = remark;
         appendTimeline('更新订单基本信息');
       }
 
@@ -880,178 +1081,187 @@
       setStepActive(2);
       alert('订单基本信息已保存，可以点击【扫码添加】录入设备。');
 
-      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
-      if(idx===-1) orderHistory.unshift({...currentOrder});
-      else orderHistory[idx]={...currentOrder};
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) orderHistory.unshift({ ...currentOrder });
+      else orderHistory[idx] = { ...currentOrder };
       renderOrderList();
     }
 
-    function resetBasicInfo(){
-      fieldOrderType.value='调拨出库';
-      fieldOrderNo.value='';
-      fieldFromStore.value='';
-      fieldToStore.value='';
-      fieldCreator.value='张三 / 1008611';
-      fieldPhone.value='';
-      fieldRemark.value='';
-      currentOrder=null;
+    function resetBasicInfo() {
+      fieldOrderType.value = '调拨出库';
+      fieldOrderNo.value = '';
+      fieldFromStore.value = '';
+      fieldToStore.value = '';
+      fieldCreator.value = '张三 / 1008611';
+      fieldPhone.value = '';
+      fieldRemark.value = '';
+      currentOrder = null;
       setOrderStatus('草稿');
       setStepActive(1);
-      timelineEl.innerHTML='<div class="timeline-item">系统初始化订单流程（草稿）</div>';
+      timelineEl.innerHTML = '<div class="timeline-item">系统初始化订单流程（草稿）</div>';
       renderDeviceList();
     }
 
-    btnSaveBasic.addEventListener('click',saveBasicInfo);
-    btnResetBasic.addEventListener('click',resetBasicInfo);
+    btnSaveBasic.addEventListener('click', saveBasicInfo);
+    btnResetBasic.addEventListener('click', resetBasicInfo);
 
-    // 终端台账（演示：内蒙数据）
+    // ============== 内蒙古终端台账样例 ==============
     const innerMongoliaRecord = {
       sn: 'SKYWA8EFF0AD',
       domain: '内蒙古自治区·呼和浩特市新城区',
       type: '光猫-家庭网关',
       status: '在库',
-      location: '内蒙古·呼和浩特市新城区管理域仓库'
+      location: '内蒙古·呼和浩特市新城区管理域仓库',
+      vendor: 'NMTY',
+      model: 'TEWA-7100A',
+      inTime: '2024-10-18 09:30'
     };
 
-    // 其他示例台账（保留）
     const terminalCatalog = {
       "SN1234567890": {
         sn: "SN1234567890",
         domain: "内蒙古自治区·包头市昆都仑区",
         type: "光猫",
         status: "在库",
-        location: "内蒙古·包头市昆都仑区中心仓"
+        location: "内蒙古·包头市昆都仑区中心仓",
+        vendor: "演示厂家A",
+        model: "MODEL-A1",
+        inTime: "2024-03-01 10:00"
       }
     };
 
-    // 扫码弹窗开关
-    const scanModal=document.getElementById('scanModal');
-    const btnOpenScanModal=document.getElementById('btnOpenScanModal');
-    const btnCloseScanModal=document.getElementById('btnCloseScanModal');
+    // ============== 扫码弹窗开关 =====================
+    const scanModal = document.getElementById('scanModal');
+    const btnOpenScanModal = document.getElementById('btnOpenScanModal');
+    const btnCloseScanModal = document.getElementById('btnCloseScanModal');
 
-    btnOpenScanModal.addEventListener('click',()=>{
-      if(!currentOrder){
+    let scanContext = 'transfer'; // transfer | fault
+
+    btnOpenScanModal.addEventListener('click', () => {
+      if (!currentOrder) {
         alert('请先保存订单基本信息，再进行扫码。');
         return;
       }
+      scanContext = 'transfer';
       scanModal.classList.add('active');
       setStepActive(2);
     });
 
-    btnCloseScanModal.addEventListener('click',()=>{
+    btnCloseScanModal.addEventListener('click', () => {
       scanModal.classList.remove('active');
     });
-    scanModal.addEventListener('click',e=>{
-      if(e.target===scanModal) scanModal.classList.remove('active');
+
+    scanModal.addEventListener('click', (e) => {
+      if (e.target === scanModal) {
+        scanModal.classList.remove('active');
+      }
     });
 
-    // 摄像头 & 多码识别（固定一维码 + 二维码）
-    const mockRecognizedCodes=[
-      { code:"SKYWA8EFF0AD", type:"一维码" },
-      { code:"ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type:"二维码" }
+    // ============== 摄像头 & 多码识别（固定一维码 + 二维码） ==============
+    const mockRecognizedCodes = [
+      { code: "SKYWA8EFF0AD", type: "一维码" },
+      { code: "ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type: "二维码" }
     ];
-const cameraVideo=document.getElementById('cameraVideo');
-const cameraStatus=document.getElementById('cameraStatus');
-const btnOpenCamera=document.getElementById('btnOpenCamera');
-const btnStopCamera=document.getElementById('btnStopCamera');
-// 手动示例按钮（当前页面没有这个按钮，可能为 null）
-const btnMockScan=document.getElementById('btnMockScan');
-const codeTagsContainer=document.getElementById('codeTags');
 
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const btnOpenCamera = document.getElementById('btnOpenCamera');
+    const btnStopCamera = document.getElementById('btnStopCamera');
+    const btnMockScan = document.getElementById('btnMockScan');
+    const codeTagsContainer = document.getElementById('codeTags');
 
+    const summaryCount = document.getElementById('summaryCount');
+    const summaryType = document.getElementById('summaryType');
+    const summaryTime = document.getElementById('summaryTime');
+    const summaryCurrentCode = document.getElementById('summaryCurrentCode');
+    const summaryCurrentType = document.getElementById('summaryCurrentType');
+    const summaryCurrentResult = document.getElementById('summaryCurrentResult');
 
-    const summaryCount=document.getElementById('summaryCount');
-    const summaryType=document.getElementById('summaryType');
-    const summaryTime=document.getElementById('summaryTime');
-    const summaryCurrentCode=document.getElementById('summaryCurrentCode');
-    const summaryCurrentType=document.getElementById('summaryCurrentType');
-    const summaryCurrentResult=document.getElementById('summaryCurrentResult');
+    const infoCode = document.getElementById('infoCode');
+    const infoSN = document.getElementById('infoSN');
+    const infoDomain = document.getElementById('infoDomain');
+    const infoType = document.getElementById('infoType');
+    const infoStatus = document.getElementById('infoStatus');
+    const infoLocation = document.getElementById('infoLocation');
 
-    const infoCode=document.getElementById('infoCode');
-    const infoSN=document.getElementById('infoSN');
-    const infoDomain=document.getElementById('infoDomain');
-    const infoType=document.getElementById('infoType');
-    const infoStatus=document.getElementById('infoStatus');
-    const infoLocation=document.getElementById('infoLocation');
+    let currentStream = null;
+    let currentCode = null;
+    let currentSelectedItem = null;
 
-    let currentStream=null;
-    let currentCode=null;
-    let currentSelectedItem=null;
-
-    btnOpenCamera.addEventListener('click',async()=>{
-      try{
-        if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    btnOpenCamera.addEventListener('click', async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
           return;
         }
-        currentStream=await navigator.mediaDevices.getUserMedia({
-          video:{ facingMode:"environment" },
-          audio:false
+        currentStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false
         });
-        cameraVideo.srcObject=currentStream;
-        cameraStatus.textContent='摄像头已开启';
-        btnOpenCamera.disabled=true;
-        btnStopCamera.disabled=false;
+        cameraVideo.srcObject = currentStream;
+        cameraStatus.textContent = '摄像头已开启';
+        btnOpenCamera.disabled = true;
+        btnStopCamera.disabled = false;
 
         // 打开摄像头 2 秒后自动出现一维码 + 二维码
-        setTimeout(()=>{
+        setTimeout(() => {
           renderCodeTags(mockRecognizedCodes);
-          const first=mockRecognizedCodes[0];
-          if(first){
-            const firstTag=document.querySelector('.code-tag[data-index="0"]');
-            if(firstTag) firstTag.classList.add('active');
+          const first = mockRecognizedCodes[0];
+          if (first) {
+            const firstTag = document.querySelector('.code-tag[data-index="0"]');
+            if (firstTag) firstTag.classList.add('active');
             onCodeSelected(first);
           }
-        },2000);
-      }catch(e){
+        }, 2000);
+      } catch (e) {
         console.error(e);
-        alert('摄像头开启失败：'+e.message);
+        alert('摄像头开启失败：' + e.message);
       }
     });
 
-    btnStopCamera.addEventListener('click',()=>{
-      if(currentStream){
-        currentStream.getTracks().forEach(t=>t.stop());
-        currentStream=null;
+    btnStopCamera.addEventListener('click', () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
       }
-      cameraVideo.srcObject=null;
-      cameraStatus.textContent='摄像头未开启';
-      btnOpenCamera.disabled=false;
-      btnStopCamera.disabled=true;
+      cameraVideo.srcObject = null;
+      cameraStatus.textContent = '摄像头未开启';
+      btnOpenCamera.disabled = false;
+      btnStopCamera.disabled = true;
     });
 
-    function renderCodeTags(codes){
-      codeTagsContainer.innerHTML='';
-      if(!codes||!codes.length){
-        const span=document.createElement('span');
-        span.style.fontSize='10px';
-        span.style.color='#9ca3af';
-        span.textContent='尚未识别到任何码，可点击“多码识别示例”查看多码识别与光标选项效果。';
+    function renderCodeTags(codes) {
+      codeTagsContainer.innerHTML = '';
+      if (!codes || !codes.length) {
+        const span = document.createElement('span');
+        span.style.fontSize = '10px';
+        span.style.color = '#9ca3af';
+        span.textContent = '尚未识别到任何码，可点击“多码识别示例”查看多码识别与光标选项效果。';
         codeTagsContainer.appendChild(span);
-        summaryCount.textContent='0';
-        summaryType.textContent='-';
-        summaryTime.textContent='-';
+        summaryCount.textContent = '0';
+        summaryType.textContent = '-';
+        summaryTime.textContent = '-';
         return;
       }
-      let typeSet=new Set();
-      codes.forEach((item,idx)=>{
+      let typeSet = new Set();
+      codes.forEach((item, idx) => {
         typeSet.add(item.type);
-        const tag=document.createElement('div');
-        tag.className='code-tag';
-        tag.dataset.index=idx;
+        const tag = document.createElement('div');
+        tag.className = 'code-tag';
+        tag.dataset.index = idx;
 
-        const typeSpan=document.createElement('span');
-        typeSpan.className='code-tag-type';
-        typeSpan.textContent=item.type;
+        const typeSpan = document.createElement('span');
+        typeSpan.className = 'code-tag-type';
+        typeSpan.textContent = item.type;
 
-        const textSpan=document.createElement('span');
-        textSpan.textContent=item.code;
+        const textSpan = document.createElement('span');
+        textSpan.textContent = item.code;
 
         tag.appendChild(typeSpan);
         tag.appendChild(textSpan);
 
-        tag.addEventListener('click',()=>{
-          document.querySelectorAll('.code-tag').forEach(el=>el.classList.remove('active'));
+        tag.addEventListener('click', () => {
+          document.querySelectorAll('.code-tag').forEach(el => el.classList.remove('active'));
           tag.classList.add('active');
           onCodeSelected(item);
         });
@@ -1059,124 +1269,120 @@ const codeTagsContainer=document.getElementById('codeTags');
         codeTagsContainer.appendChild(tag);
       });
 
-      summaryCount.textContent=String(codes.length);
-      summaryType.textContent=Array.from(typeSet).join(' / ');
-      summaryTime.textContent=new Date().toLocaleString();
+      summaryCount.textContent = String(codes.length);
+      summaryType.textContent = Array.from(typeSet).join(' / ');
+      summaryTime.textContent = new Date().toLocaleString();
     }
 
-// 手动示例按钮（如果页面上没有该按钮，就不绑定事件，避免报错）
-if (btnMockScan) {
-  btnMockScan.addEventListener('click', () => {
-    renderCodeTags(mockRecognizedCodes);
-    const first = mockRecognizedCodes[0];
-    if (first) {
-      const firstTag = document.querySelector('.code-tag[data-index="0"]');
-      if (firstTag) firstTag.classList.add('active');
-      onCodeSelected(first);
-    }
-  });
-}
+    btnMockScan.addEventListener('click', () => {
+      renderCodeTags(mockRecognizedCodes);
+      const first = mockRecognizedCodes[0];
+      if (first) {
+        const firstTag = document.querySelector('.code-tag[data-index="0"]');
+        if (firstTag) firstTag.classList.add('active');
+        onCodeSelected(first);
+      }
+    });
 
+    function onCodeSelected(item) {
+      currentCode = item.code;
+      currentSelectedItem = item;
+      summaryCurrentCode.textContent = item.code;
+      summaryCurrentType.textContent = item.type;
 
-    function onCodeSelected(item){
-      currentCode=item.code;
-      currentSelectedItem=item;
-      summaryCurrentCode.textContent=item.code;
-      summaryCurrentType.textContent=item.type;
-
-      // 逻辑：若是一维码 SKYWA8EFF0AD 或 二维码中包含 sn=SKYWA8EFF0AD，则按内蒙台账展示
-      let record=null;
-      if(item.code==='SKYWA8EFF0AD' || item.code.indexOf('sn=SKYWA8EFF0AD')>-1){
-        record=innerMongoliaRecord;
-      }else if(terminalCatalog[item.code]){
-        record=terminalCatalog[item.code];
+      let record = null;
+      if (item.code === 'SKYWA8EFF0AD' || item.code.indexOf('sn=SKYWA8EFF0AD') > -1) {
+        record = innerMongoliaRecord;
+      } else if (terminalCatalog[item.code]) {
+        record = terminalCatalog[item.code];
       }
 
-      if(record){
-        infoCode.textContent=item.code;
-        infoSN.textContent=record.sn;
-        infoDomain.textContent=record.domain;
-        infoType.textContent=record.type;
-        infoStatus.textContent=record.status;
-        infoLocation.textContent=record.location;
+      if (record) {
+        infoCode.textContent = item.code;
+        infoSN.textContent = record.sn;
+        infoDomain.textContent = record.domain;
+        infoType.textContent = record.type;
+        infoStatus.textContent = record.status;
+        infoLocation.textContent = record.location;
 
-        infoSN.className='info-item-value good';
-        infoDomain.className='info-item-value good';
-        infoType.className='info-item-value good';
-        infoStatus.className='info-item-value good';
-        infoLocation.className='info-item-value good';
+        infoSN.className = 'info-item-value good';
+        infoDomain.className = 'info-item-value good';
+        infoType.className = 'info-item-value good';
+        infoStatus.className = 'info-item-value good';
+        infoLocation.className = 'info-item-value good';
 
-        summaryCurrentResult.textContent='已找到系统终端台账记录';
-        summaryCurrentResult.className='good';
-      }else{
-        infoCode.textContent=item.code;
-        infoSN.textContent='系统无记录';
-        infoDomain.textContent='系统无记录';
-        infoType.textContent='系统无记录';
-        infoStatus.textContent='系统无记录';
-        infoLocation.textContent='系统无记录';
+        summaryCurrentResult.textContent = '已找到系统终端台账记录';
+        summaryCurrentResult.className = 'good';
+      } else {
+        infoCode.textContent = item.code;
+        infoSN.textContent = '系统无记录';
+        infoDomain.textContent = '系统无记录';
+        infoType.textContent = '系统无记录';
+        infoStatus.textContent = '系统无记录';
+        infoLocation.textContent = '系统无记录';
 
-        infoSN.className='info-item-value bad';
-        infoDomain.className='info-item-value bad';
-        infoType.className='info-item-value bad';
-        infoStatus.className='info-item-value bad';
-        infoLocation.className='info-item-value bad';
+        infoSN.className = 'info-item-value bad';
+        infoDomain.className = 'info-item-value bad';
+        infoType.className = 'info-item-value bad';
+        infoStatus.className = 'info-item-value bad';
+        infoLocation.className = 'info-item-value bad';
 
-        summaryCurrentResult.textContent='未在系统台账中找到该串码';
-        summaryCurrentResult.className='bad';
+        summaryCurrentResult.textContent = '未在系统台账中找到该串码';
+        summaryCurrentResult.className = 'bad';
       }
     }
 
-    const btnAddDevice=document.getElementById('btnAddDevice');
+    // ============== 设备清单操作（调拨） ==============
+    const btnAddDevice = document.getElementById('btnAddDevice');
 
-    function renderDeviceList(){
-      deviceListContainer.innerHTML='';
-      if(!currentOrder || !currentOrder.devices.length){
-        const div=document.createElement('div');
-        div.style.fontSize='11px';
-        div.style.color='#9ca3af';
-        div.style.padding='8px 8px';
-        div.textContent='暂无设备，请先点击上方【扫码添加】录入设备。';
+    function renderDeviceList() {
+      deviceListContainer.innerHTML = '';
+      if (!currentOrder || !currentOrder.devices.length) {
+        const div = document.createElement('div');
+        div.style.fontSize = '11px';
+        div.style.color = '#9ca3af';
+        div.style.padding = '8px 8px';
+        div.textContent = '暂无设备，请先点击上方【扫码添加】录入设备。';
         deviceListContainer.appendChild(div);
-        deviceCountSpan.textContent='0';
+        deviceCountSpan.textContent = '0';
         return;
       }
-      deviceCountSpan.textContent=String(currentOrder.devices.length);
+      deviceCountSpan.textContent = String(currentOrder.devices.length);
 
-      currentOrder.devices.forEach((dev,index)=>{
-        const row=document.createElement('div');
-        row.className='device-row';
+      currentOrder.devices.forEach((dev, index) => {
+        const row = document.createElement('div');
+        row.className = 'device-row';
 
-        const meta=document.createElement('div');
-        meta.className='device-meta';
+        const meta = document.createElement('div');
+        meta.className = 'device-meta';
 
-        const line1=document.createElement('div');
-        line1.className='device-meta-line';
-        line1.textContent=dev.code+' | '+dev.type;
+        const line1 = document.createElement('div');
+        line1.className = 'device-meta-line';
+        line1.textContent = dev.code + ' | ' + dev.type;
 
-        const line2=document.createElement('div');
-        line2.className='device-meta-line';
-        line2.style.fontSize='10px';
-        line2.style.color='#6b7280';
-        line2.textContent=dev.domain+' · '+dev.status;
+        const line2 = document.createElement('div');
+        line2.className = 'device-meta-line';
+        line2.style.fontSize = '10px';
+        line2.style.color = '#6b7280';
+        line2.textContent = dev.domain + ' · ' + dev.status;
 
-        const line3=document.createElement('div');
-        line3.className='device-meta-line';
-        line3.style.fontSize='10px';
-        line3.style.color='#9ca3af';
-        line3.textContent=dev.location;
+        const line3 = document.createElement('div');
+        line3.className = 'device-meta-line';
+        line3.style.fontSize = '10px';
+        line3.style.color = '#9ca3af';
+        line3.textContent = dev.location;
 
         meta.appendChild(line1);
         meta.appendChild(line2);
         meta.appendChild(line3);
 
-        const actionBtn=document.createElement('button');
-        actionBtn.className='btn btn-outline';
-        actionBtn.style.fontSize='10px';
-        actionBtn.textContent='移除';
-        actionBtn.addEventListener('click',()=>{
-          currentOrder.devices.splice(index,1);
-          appendTimeline('移除设备：'+dev.code);
+        const actionBtn = document.createElement('button');
+        actionBtn.className = 'btn btn-outline';
+        actionBtn.style.fontSize = '10px';
+        actionBtn.textContent = '移除';
+        actionBtn.addEventListener('click', () => {
+          currentOrder.devices.splice(index, 1);
+          appendTimeline('移除设备：' + dev.code);
           renderDeviceList();
         });
 
@@ -1186,162 +1392,457 @@ if (btnMockScan) {
       });
     }
 
-    btnAddDevice.addEventListener('click',()=>{
-      if(!currentOrder){
-        alert('请先保存订单基本信息。');
+    // ============== 故障终端闭环管理：数据与交互 ==============
+    const faultStatusBadge = document.getElementById('faultStatusBadge');
+    const faultNoInput     = document.getElementById('faultNo');
+    const faultSource      = document.getElementById('faultSource');
+    const faultCity        = document.getElementById('faultCity');
+    const faultCounty      = document.getElementById('faultCounty');
+    const faultReporter    = document.getElementById('faultReporter');
+    const faultPhone       = document.getElementById('faultPhone');
+    const faultType        = document.getElementById('faultType');
+    const faultLevel       = document.getElementById('faultLevel');
+    const faultDesc        = document.getElementById('faultDesc');
+    const faultUsage       = document.getElementById('faultUsage');
+    const faultPhotos      = document.getElementById('faultPhotos');
+
+    const faultDevCode     = document.getElementById('faultDevCode');
+    const faultDevSn       = document.getElementById('faultDevSn');
+    const faultDevType     = document.getElementById('faultDevType');
+    const faultDevVendor   = document.getElementById('faultDevVendor');
+    const faultDevModel    = document.getElementById('faultDevModel');
+    const faultDevInTime   = document.getElementById('faultDevInTime');
+    const faultDevStatus   = document.getElementById('faultDevStatus');
+    const faultDevLocation = document.getElementById('faultDevLocation');
+
+    const btnOpenFaultScanModal = document.getElementById('btnOpenFaultScanModal');
+    const btnClearFaultDevice   = document.getElementById('btnClearFaultDevice');
+    const btnSaveFaultDraft     = document.getElementById('btnSaveFaultDraft');
+    const btnClearFault         = document.getElementById('btnClearFault');
+    const btnSubmitFault        = document.getElementById('btnSubmitFault');
+    const faultListEl           = document.getElementById('faultList');
+
+    let currentFaultTicket = null;
+    let faultTickets = [];
+
+    function setFaultStatus(status) {
+      faultStatusBadge.textContent = status;
+      faultStatusBadge.className = 'badge-status';
+      if (status === '草稿') faultStatusBadge.classList.add('badge-draft');
+      else if (status === '已提交') faultStatusBadge.classList.add('badge-pass');
+    }
+
+    function clearFaultDeviceView() {
+      faultDevCode.textContent = '-';
+      faultDevSn.textContent = '-';
+      faultDevType.textContent = '-';
+      faultDevVendor.textContent = '-';
+      faultDevModel.textContent = '-';
+      faultDevInTime.textContent = '-';
+      faultDevStatus.textContent = '-';
+      faultDevLocation.textContent = '-';
+    }
+
+    function resetFaultForm() {
+      faultNoInput.value = '';
+      faultSource.value = '装维APP反馈';
+      faultCity.value = '内蒙古·呼和浩特市';
+      faultCounty.value = '新城区';
+      faultReporter.value = '李四 / 1008622';
+      faultPhone.value = '';
+      faultType.value = '设备无法上电';
+      faultLevel.value = '一般';
+      faultDesc.value = '';
+      faultUsage.value = '';
+      faultPhotos.value = '';
+      clearFaultDeviceView();
+      currentFaultTicket = null;
+      setFaultStatus('草稿');
+    }
+
+    function saveFaultDraft() {
+      const city = faultCity.value.trim();
+      const county = faultCounty.value.trim();
+      const reporter = faultReporter.value.trim();
+      const desc = faultDesc.value.trim();
+
+      if (!city || !county || !reporter || !desc) {
+        alert('所属地市、所属区县、反馈人/工号、故障现象描述为必填项。');
         return;
       }
-      if(!currentCode || !currentSelectedItem){
+
+      if (!currentFaultTicket) {
+        const faultNo = generateFaultNo();
+        faultNoInput.value = faultNo;
+        currentFaultTicket = {
+          faultNo,
+          status: '草稿',
+          basic: {},
+          device: null,
+          detail: {}
+        };
+      }
+
+      currentFaultTicket.basic = {
+        source: faultSource.value,
+        city: faultCity.value.trim(),
+        county: faultCounty.value.trim(),
+        reporter: faultReporter.value.trim(),
+        phone: faultPhone.value.trim()
+      };
+
+      currentFaultTicket.detail = {
+        type: faultType.value,
+        level: faultLevel.value,
+        desc: faultDesc.value.trim(),
+        usage: faultUsage.value.trim(),
+        photoCount: faultPhotos.files ? faultPhotos.files.length : 0
+      };
+
+      // 设备信息
+      if (faultDevSn.textContent !== '-' && faultDevSn.textContent.trim() !== '') {
+        currentFaultTicket.device = {
+          code: faultDevCode.textContent,
+          sn: faultDevSn.textContent,
+          type: faultDevType.textContent,
+          vendor: faultDevVendor.textContent,
+          model: faultDevModel.textContent,
+          inTime: faultDevInTime.textContent,
+          status: faultDevStatus.textContent,
+          location: faultDevLocation.textContent
+        };
+      }
+
+      setFaultStatus('草稿');
+      alert('故障工单草稿已保存，可继续补充或修改后再提交。');
+      renderFaultList();
+    }
+
+    function renderFaultList() {
+      faultListEl.innerHTML = '';
+      if (!faultTickets.length && !currentFaultTicket) {
+        faultListEl.style.color = '#9ca3af';
+        faultListEl.textContent = '暂无故障工单，请先在上方创建并提交。';
+        return;
+      }
+      const tickets = [...faultTickets];
+      if (currentFaultTicket && !faultTickets.find(t => t.faultNo === currentFaultTicket.faultNo)) {
+        tickets.unshift(currentFaultTicket);
+      }
+      tickets.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'order-item';
+        const header = document.createElement('div');
+        header.className = 'order-header';
+        const title = document.createElement('div');
+        title.className = 'order-title';
+        title.textContent = t.faultNo;
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'badge-status';
+        statusSpan.textContent = t.status;
+        if (t.status === '草稿') statusSpan.classList.add('badge-draft');
+        if (t.status === '已提交') statusSpan.classList.add('badge-pass');
+        header.appendChild(title);
+        header.appendChild(statusSpan);
+
+        const meta1 = document.createElement('div');
+        meta1.className = 'order-meta';
+        const left1 = document.createElement('span');
+        left1.textContent = (t.detail?.type || '未知') + ' | ' + (t.device?.type || '未关联终端');
+        const right1 = document.createElement('span');
+        right1.textContent = t.basic?.city + ' · ' + t.basic?.county;
+        meta1.appendChild(left1);
+        meta1.appendChild(right1);
+
+        const meta2 = document.createElement('div');
+        meta2.className = 'order-meta';
+        const left2 = document.createElement('span');
+        left2.textContent = '反馈人：' + (t.basic?.reporter || '');
+        const right2 = document.createElement('span');
+        right2.textContent = t.device?.sn || '无 SN';
+        meta2.appendChild(left2);
+        meta2.appendChild(right2);
+
+        div.appendChild(header);
+        div.appendChild(meta1);
+        div.appendChild(meta2);
+
+        // 仅对草稿支持回填
+        if (t.status === '草稿') {
+          const tagRow = document.createElement('div');
+          tagRow.style.marginTop = '4px';
+          const tag = document.createElement('span');
+          tag.className = 'tag';
+          tag.textContent = '点击回填到上方进行修改';
+          tagRow.appendChild(tag);
+          div.appendChild(tagRow);
+
+          div.addEventListener('click', () => {
+            currentFaultTicket = { ...t };
+            faultNoInput.value = t.faultNo;
+            faultSource.value = t.basic.source;
+            faultCity.value = t.basic.city;
+            faultCounty.value = t.basic.county;
+            faultReporter.value = t.basic.reporter;
+            faultPhone.value = t.basic.phone || '';
+
+            faultType.value = t.detail.type;
+            faultLevel.value = t.detail.level || '一般';
+            faultDesc.value = t.detail.desc;
+            faultUsage.value = t.detail.usage || '';
+            setFaultStatus(t.status);
+
+            if (t.device) {
+              faultDevCode.textContent = t.device.code;
+              faultDevSn.textContent = t.device.sn;
+              faultDevType.textContent = t.device.type;
+              faultDevVendor.textContent = t.device.vendor;
+              faultDevModel.textContent = t.device.model;
+              faultDevInTime.textContent = t.device.inTime;
+              faultDevStatus.textContent = t.device.status;
+              faultDevLocation.textContent = t.device.location;
+            } else {
+              clearFaultDeviceView();
+            }
+          });
+        }
+
+        faultListEl.appendChild(div);
+      });
+    }
+
+    btnSaveFaultDraft.addEventListener('click', saveFaultDraft);
+    btnClearFault.addEventListener('click', () => {
+      if (confirm('确认删除当前故障工单草稿？')) {
+        if (currentFaultTicket) {
+          faultTickets = faultTickets.filter(t => t.faultNo !== currentFaultTicket.faultNo);
+        }
+        resetFaultForm();
+        renderFaultList();
+      }
+    });
+
+    btnSubmitFault.addEventListener('click', () => {
+      if (!currentFaultTicket) {
+        alert('请先保存一次故障工单草稿，再提交。');
+        return;
+      }
+      saveFaultDraft(); // 确保最新内容写入
+      currentFaultTicket.status = '已提交';
+      setFaultStatus('已提交');
+      faultTickets = faultTickets.filter(t => t.faultNo !== currentFaultTicket.faultNo);
+      faultTickets.unshift({ ...currentFaultTicket });
+      alert('故障工单已提交，后续可在后台进行派单处理与闭环跟踪。');
+      renderFaultList();
+    });
+
+    btnClearFaultDevice.addEventListener('click', () => {
+      clearFaultDeviceView();
+      if (currentFaultTicket) currentFaultTicket.device = null;
+    });
+
+    btnOpenFaultScanModal.addEventListener('click', () => {
+      scanContext = 'fault';
+      scanModal.classList.add('active');
+    });
+
+    // ============== 将当前串码写入不同场景 ==============
+    btnAddDevice.addEventListener('click', () => {
+      if (!currentSelectedItem || !currentCode) {
         alert('请先在识别框中选择一个光标串码。');
         return;
       }
-
-      const record = (currentCode==='SKYWA8EFF0AD' || currentCode.indexOf('sn=SKYWA8EFF0AD')>-1)
-        ? innerMongoliaRecord
-        : (terminalCatalog[currentCode] || {
-            sn:'-',
-            domain:'系统无记录',
-            type:'未知',
-            status:'未知',
-            location:'未知'
-          });
-
-      const exists=currentOrder.devices.some(d=>d.code===currentCode);
-      if(exists){
-        alert('该设备已在本订单清单中，无需重复添加。');
-        return;
+      let record = null;
+      if (currentCode === 'SKYWA8EFF0AD' || currentCode.indexOf('sn=SKYWA8EFF0AD') > -1) {
+        record = innerMongoliaRecord;
+      } else if (terminalCatalog[currentCode]) {
+        record = terminalCatalog[currentCode];
+      } else {
+        record = {
+          sn: currentCode,
+          domain: '系统无记录',
+          type: '未知',
+          status: '未知',
+          location: '未知',
+          vendor: '未知',
+          model: '未知',
+          inTime: '-'
+        };
       }
 
-      currentOrder.devices.push({
-        code: currentCode,
-        sn: record.sn,
-        domain: record.domain,
-        type: record.type,
-        status: record.status,
-        location: record.location
-      });
+      if (scanContext === 'transfer') {
+        if (!currentOrder) {
+          alert('请先保存订单基本信息。');
+          return;
+        }
+        const exists = currentOrder.devices.some(d => d.code === currentCode);
+        if (exists) {
+          alert('该设备已在本订单清单中，无需重复添加。');
+          return;
+        }
+        currentOrder.devices.push({
+          code: currentCode,
+          sn: record.sn,
+          domain: record.domain,
+          type: record.type,
+          status: record.status,
+          location: record.location
+        });
+        appendTimeline('扫码并加入设备：' + currentCode);
 
-      appendTimeline('扫码并加入设备：'+currentCode);
-      renderDeviceList();
-
-      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
-      if(idx===-1) orderHistory.unshift({...currentOrder});
-      else orderHistory[idx]={...currentOrder};
-      renderOrderList();
-
-      scanModal.classList.remove('active');
+        const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+        if (idx === -1) orderHistory.unshift({ ...currentOrder });
+        else orderHistory[idx] = { ...currentOrder };
+        renderDeviceList();
+        renderOrderList();
+        scanModal.classList.remove('active');
+      } else if (scanContext === 'fault') {
+        // 写入故障工单的关联设备信息
+        faultDevCode.textContent = currentCode;
+        faultDevSn.textContent = record.sn;
+        faultDevType.textContent = record.type;
+        faultDevVendor.textContent = record.vendor || 'NMTY';
+        faultDevModel.textContent = record.model || 'TEWA-7100A';
+        faultDevInTime.textContent = record.inTime || '2024-10';
+        faultDevStatus.textContent = record.status;
+        faultDevLocation.textContent = record.location;
+        if (!currentFaultTicket) {
+          const faultNo = generateFaultNo();
+          faultNoInput.value = faultNo;
+          currentFaultTicket = {
+            faultNo,
+            status: '草稿',
+            basic: {},
+            device: null,
+            detail: {}
+          };
+        }
+        currentFaultTicket.device = {
+          code: currentCode,
+          sn: record.sn,
+          type: record.type,
+          vendor: record.vendor || 'NMTY',
+          model: record.model || 'TEWA-7100A',
+          inTime: record.inTime || '2024-10',
+          status: record.status,
+          location: record.location
+        };
+        scanModal.classList.remove('active');
+      }
     });
 
-    btnGoApprove.addEventListener('click',()=>{
-      if(!currentOrder){
+    // ============== 审批模拟 ==============
+    btnGoApprove.addEventListener('click', () => {
+      if (!currentOrder) {
         alert('请先保存订单基本信息。');
         return;
       }
-      if(!currentOrder.devices.length){
-        if(!confirm('当前订单设备清单为空，确定要直接进入审批环节吗？')) return;
+      if (!currentOrder.devices.length) {
+        if (!confirm('当前订单设备清单为空，确定要直接进入审批环节吗？')) return;
       }
       setStepActive(3);
       appendTimeline('进入审批确认环节');
     });
 
-    btnSubmitApprove.addEventListener('click',()=>{
-      if(!currentOrder){
+    btnSubmitApprove.addEventListener('click', () => {
+      if (!currentOrder) {
         alert('请先完成订单基本信息并至少保存一次。');
         return;
       }
       setOrderStatus('待审批');
-      currentOrder.status='待审批';
+      currentOrder.status = '待审批';
       appendTimeline('提交审批');
-      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
-      if(idx===-1) orderHistory.unshift({...currentOrder});
-      else orderHistory[idx]={...currentOrder};
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) orderHistory.unshift({ ...currentOrder });
+      else orderHistory[idx] = { ...currentOrder };
       renderOrderList();
     });
 
-    btnApprovePass.addEventListener('click',()=>{
-      if(!currentOrder || currentOrder.status!=='待审批'){
+    btnApprovePass.addEventListener('click', () => {
+      if (!currentOrder || currentOrder.status !== '待审批') {
         alert('当前订单尚未处于“待审批”状态，无法执行审批通过演示。');
         return;
       }
       setOrderStatus('已通过');
-      currentOrder.status='已通过';
+      currentOrder.status = '已通过';
       appendTimeline('审批通过，订单流程完成');
-      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
-      if(idx===-1) orderHistory.unshift({...currentOrder});
-      else orderHistory[idx]={...currentOrder};
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) orderHistory.unshift({ ...currentOrder });
+      else orderHistory[idx] = { ...currentOrder };
       renderOrderList();
     });
 
-    btnApproveReject.addEventListener('click',()=>{
-      if(!currentOrder || currentOrder.status!=='待审批'){
+    btnApproveReject.addEventListener('click', () => {
+      if (!currentOrder || currentOrder.status !== '待审批') {
         alert('当前订单尚未处于“待审批”状态，无法执行审批驳回演示。');
         return;
       }
       setOrderStatus('已驳回');
-      currentOrder.status='已驳回';
+      currentOrder.status = '已驳回';
       appendTimeline('审批驳回，订单流程终止');
-      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
-      if(idx===-1) orderHistory.unshift({...currentOrder});
-      else orderHistory[idx]={...currentOrder};
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) orderHistory.unshift({ ...currentOrder });
+      else orderHistory[idx] = { ...currentOrder };
       renderOrderList();
     });
 
-    function renderOrderList(){
-      orderListEl.innerHTML='';
-      if(!orderHistory.length){
-        const div=document.createElement('div');
-        div.style.fontSize='11px';
-        div.style.color='#9ca3af';
-        div.textContent='暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。';
+    // ============== 订单列表渲染 ==============
+    function renderOrderList() {
+      orderListEl.innerHTML = '';
+      if (!orderHistory.length) {
+        const div = document.createElement('div');
+        div.style.fontSize = '11px';
+        div.style.color = '#9ca3af';
+        div.textContent = '暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。';
         orderListEl.appendChild(div);
         return;
       }
 
-      orderHistory.forEach(order=>{
-        const item=document.createElement('div');
-        item.className='order-item';
+      orderHistory.forEach(order => {
+        const item = document.createElement('div');
+        item.className = 'order-item';
 
-        const header=document.createElement('div');
-        header.className='order-header';
+        const header = document.createElement('div');
+        header.className = 'order-header';
 
-        const title=document.createElement('div');
-        title.className='order-title';
-        title.textContent=order.orderNo;
+        const title = document.createElement('div');
+        title.className = 'order-title';
+        title.textContent = order.orderNo;
 
-        const statusSpan=document.createElement('span');
-        statusSpan.className='badge-status';
-        statusSpan.textContent=order.status;
-        if(order.status==='草稿')statusSpan.classList.add('badge-draft');
-        if(order.status==='待审批')statusSpan.classList.add('badge-pending');
-        if(order.status==='已通过')statusSpan.classList.add('badge-pass');
-        if(order.status==='已驳回')statusSpan.classList.add('badge-reject');
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'badge-status';
+        statusSpan.textContent = order.status;
+        if (order.status === '草稿') statusSpan.classList.add('badge-draft');
+        if (order.status === '待审批') statusSpan.classList.add('badge-pending');
+        if (order.status === '已通过') statusSpan.classList.add('badge-pass');
+        if (order.status === '已驳回') statusSpan.classList.add('badge-reject');
 
         header.appendChild(title);
         header.appendChild(statusSpan);
 
-        const meta1=document.createElement('div');
-        meta1.className='order-meta';
-        const left1=document.createElement('span');
-        left1.textContent=order.type+' | 设备数：'+order.devices.length;
-        const right1=document.createElement('span');
-        right1.textContent='创建人：'+order.creator;
+        const meta1 = document.createElement('div');
+        meta1.className = 'order-meta';
+        const left1 = document.createElement('span');
+        left1.textContent = order.type + ' | 设备数：' + order.devices.length;
+        const right1 = document.createElement('span');
+        right1.textContent = '创建人：' + order.creator;
         meta1.appendChild(left1);
         meta1.appendChild(right1);
 
-        const meta2=document.createElement('div');
-        meta2.className='order-meta';
-        const left2=document.createElement('span');
-        left2.textContent='调出：'+order.fromStore;
-        const right2=document.createElement('span');
-        right2.textContent='调入：'+order.toStore;
+        const meta2 = document.createElement('div');
+        meta2.className = 'order-meta';
+        const left2 = document.createElement('span');
+        left2.textContent = '调出：' + order.fromStore;
+        const right2 = document.createElement('span');
+        right2.textContent = '调入：' + order.toStore;
         meta2.appendChild(left2);
         meta2.appendChild(right2);
 
-        const tagRow=document.createElement('div');
-        tagRow.style.marginTop='4px';
-        const tag=document.createElement('span');
-        tag.className='tag';
-        tag.textContent='点击回填到当前订单';
+        const tagRow = document.createElement('div');
+        tagRow.style.marginTop = '4px';
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = '点击回填到当前订单';
         tagRow.appendChild(tag);
 
         item.appendChild(header);
@@ -1349,18 +1850,18 @@ if (btnMockScan) {
         item.appendChild(meta2);
         item.appendChild(tagRow);
 
-        item.addEventListener('click',()=>{
-          currentOrder={...order};
-          fieldOrderType.value=order.type;
-          fieldOrderNo.value=order.orderNo;
-          fieldFromStore.value=order.fromStore;
-          fieldToStore.value=order.toStore;
-          fieldCreator.value=order.creator;
-          fieldPhone.value=order.phone||'';
-          fieldRemark.value=order.remark||'';
+        item.addEventListener('click', () => {
+          currentOrder = { ...order };
+          fieldOrderType.value = order.type;
+          fieldOrderNo.value = order.orderNo;
+          fieldFromStore.value = order.fromStore;
+          fieldToStore.value = order.toStore;
+          fieldCreator.value = order.creator;
+          fieldPhone.value = order.phone || '';
+          fieldRemark.value = order.remark || '';
           setOrderStatus(order.status);
           renderDeviceList();
-          appendTimeline('从订单列表回填订单：'+order.orderNo);
+          appendTimeline('从订单列表回填订单：' + order.orderNo);
           document.querySelector('.tab-item[data-view="transfer"]').click();
         });
 
@@ -1371,6 +1872,8 @@ if (btnMockScan) {
     // 初始化
     renderDeviceList();
     renderCodeTags([]);
+    resetFaultForm();
+    renderFaultList();
   </script>
 </body>
 </html>
