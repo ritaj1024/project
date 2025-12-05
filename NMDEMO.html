@@ -1119,17 +1119,17 @@
     const infoStatus = document.getElementById('infoStatus');
     const infoLocation = document.getElementById('infoLocation');
 
-    let currentStream = null;
     let currentCode = null;
     let currentSelectedItem = null;
-    let codeReader = null;
-    let recognizedCodes = [];
+    let codeReader = null;       // 只定义一次
+    let scanControls = null;     // ZXing 返回的控制对象
+    let recognizedCodes = [];    // 当前弹窗内识别到的所有码
 
     function getTypeLabel(format) {
       try {
         if (format === ZXing.BarcodeFormat.QR_CODE) return '二维码';
         if (format === ZXing.BarcodeFormat.DATA_MATRIX) return '二维码';
-        // 其他一律视为一维码
+        // 其他统一当作一维码展示
         return '一维码';
       } catch (e) {
         return '条码';
@@ -1143,89 +1143,13 @@
           return;
         }
 
+        // 初始化解码器（只初始化一次）
         if (!codeReader) {
           codeReader = new ZXing.BrowserMultiFormatReader();
         }
 
-    const codeReader = new ZXing.BrowserMultiFormatReader();
-let currentDeviceId = null;
-let controls = null;
-
-async function startScan() {
-  try {
-    // 1. 列出所有摄像头
-    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-    if (!devices || !devices.length) {
-      alert('没有检测到可用摄像头');
-      return;
-    }
-
-    // 2. 尝试优先选后置摄像头
-    const backCamera = devices.find(d =>
-      /back|rear|环境|后置/.test(d.label.toLowerCase())
-    );
-    currentDeviceId = (backCamera || devices[0]).deviceId;
-
-    cameraStatus.textContent = '摄像头已开启，识别中…';
-
-    // 3. 开始从指定摄像头解码
-    controls = await codeReader.decodeFromVideoDevice(
-      currentDeviceId,
-      'cameraVideo',
-      (result, err) => {
-        if (result) {
-          // 识别到码
-          handleZXingResult(result.text);  // 这里调用你原来处理串码的函数
-        }
-        // 没识别到会不断抛 NotFoundException，可以忽略
-        if (err && !(err instanceof ZXing.NotFoundException)) {
-          console.warn(err);
-        }
-      }
-    );
-
-    btnOpenCamera.disabled = true;
-    btnStopCamera.disabled = false;
-  } catch (e) {
-    console.error(e);
-    alert('摄像头开启/扫描失败：' + e.message);
-  }
-}
-
-function stopScan() {
-  try {
-    if (controls) {
-      controls.stop();   // 停止 ZXing 内部的循环
-      controls = null;
-    }
-    codeReader.reset();  // 重置解码器
-
-    const stream = cameraVideo.srcObject;
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-    }
-    cameraVideo.srcObject = null;
-
-    cameraStatus.textContent = '摄像头未开启';
-    btnOpenCamera.disabled = false;
-    btnStopCamera.disabled = true;
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-        if (!devices || devices.length === 0) {
-          alert('未找到可用摄像头。');
-          return;
-        }
-
-        // 优先使用后置摄像头（通常是最后一个或第二个）
-        let deviceId = devices[0].deviceId;
-        if (devices.length > 1) {
-          deviceId = devices[devices.length - 1].deviceId;
-        }
-
-        stopCameraAndScan(); // 保险重置一次
+        // 保证之前的扫描都停干净
+        stopCameraAndScan();
 
         recognizedCodes = [];
         renderCodeTags(recognizedCodes);
@@ -1234,38 +1158,41 @@ function stopScan() {
         btnOpenCamera.disabled = true;
         btnStopCamera.disabled = false;
 
-        codeReader.decodeFromVideoDevice(deviceId, cameraVideo, (result, err) => {
-          if (result) {
-            const text = (result.text || '').trim();
-            if (!text) return;
+        // 让 ZXing 自己选择默认摄像头（一般是后置）
+        scanControls = codeReader.decodeFromVideoDevice(
+          null,              // 不指定 deviceId，自动选
+          cameraVideo,
+          (result, err) => {
+            if (result) {
+              const text = (result.text || '').trim();
+              if (!text) return;
 
-            let format = result.barcodeFormat || (result.getBarcodeFormat ? result.getBarcodeFormat() : null);
-            const typeLabel = getTypeLabel(format);
+              const format = result.barcodeFormat ||
+                (result.getBarcodeFormat ? result.getBarcodeFormat() : null);
+              const typeLabel = getTypeLabel(format);
 
-            // 去重
-            if (!recognizedCodes.some(c => c.code === text)) {
-              const item = { code: text, type: typeLabel };
-              recognizedCodes.push(item);
-              renderCodeTags(recognizedCodes);
+              // 去重
+              if (!recognizedCodes.some(c => c.code === text)) {
+                const item = { code: text, type: typeLabel };
+                recognizedCodes.push(item);
+                renderCodeTags(recognizedCodes);
+                onCodeSelected(item);
 
-              // 自动选中最新识别的码
-              onCodeSelected(item);
-              setTimeout(() => {
-                document.querySelectorAll('.code-tag').forEach(tag => {
-                  if (tag.dataset.code === text) {
-                    tag.classList.add('active');
-                  } else {
-                    tag.classList.remove('active');
-                  }
-                });
-              }, 0);
+                // 高亮当前选中的标签
+                setTimeout(() => {
+                  document.querySelectorAll('.code-tag').forEach(tag => {
+                    if (tag.dataset.code === text) tag.classList.add('active');
+                    else tag.classList.remove('active');
+                  });
+                }, 0);
+              }
+
+              summaryTime.textContent = new Date().toLocaleString();
+            } else if (err && !(err instanceof ZXing.NotFoundException)) {
+              console.warn(err);
             }
-
-            const now = new Date();
-            summaryTime.textContent = now.toLocaleString();
           }
-        });
-
+        );
       } catch (e) {
         console.error(e);
         alert('摄像头开启/扫描失败：' + e.message);
@@ -1275,6 +1202,10 @@ function stopScan() {
 
     function stopCameraAndScan() {
       try {
+        if (scanControls) {
+          scanControls.stop();   // 停止 ZXing 的循环解码
+          scanControls = null;
+        }
         if (codeReader) {
           codeReader.reset();
         }
@@ -1282,11 +1213,12 @@ function stopScan() {
         console.warn(e);
       }
 
-      if (cameraVideo && cameraVideo.srcObject) {
-        cameraVideo.srcObject.getTracks().forEach(t => t.stop());
-        cameraVideo.srcObject = null;
+      const stream = cameraVideo.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
       }
-      currentStream = null;
+      cameraVideo.srcObject = null;
+
       cameraStatus.textContent = '摄像头未开启';
       btnOpenCamera.disabled = false;
       btnStopCamera.disabled = true;
@@ -1370,6 +1302,9 @@ function stopScan() {
         summaryCurrentResult.style.color = '#f97316';
       }
     }
+
+
+  
 
     // ============== 设备清单操作 ==============
     const btnAddDevice = document.getElementById('btnAddDevice');
