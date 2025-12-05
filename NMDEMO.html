@@ -672,12 +672,12 @@
 
           <div style="display:flex; gap:6px; margin-bottom:6px;">
             <button id="btnSubmitApprove" class="btn btn-primary">📤 提交审批</button>
-            <button id="btnApprovePass" class="btn btn-outline">✅ 审批通过（模拟）</button>
-            <button id="btnApproveReject" class="btn btn-danger">✖ 审批驳回（模拟）</button>
+            <button id="btnApprovePass" class="btn btn-outline">✅ 审批通过（演示）</button>
+            <button id="btnApproveReject" class="btn btn-danger">✖ 审批驳回（演示）</button>
           </div>
 
           <div class="hint">
-            ※ 实际实现中，提交审批后会流转至审批人端，这里采用“模拟审批通过 / 驳回”按钮快速演示流程完整性。
+            ※ 实际实现中，提交审批后会流转至审批人端，这里用按钮快速演示流程完整性。
           </div>
 
           <div class="divider"></div>
@@ -750,7 +750,7 @@
           <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
             <button id="btnOpenCamera" class="btn btn-primary">📷 打开摄像头</button>
             <button id="btnStopCamera" class="btn btn-ghost-dark btn" disabled>■ 关闭摄像头</button>
-            <button id="btnMockScan" class="btn btn-ghost-dark btn">✨ 模拟识别多个码</button>
+            <button id="btnMockScan" class="btn btn-ghost-dark btn">✨ 多码识别示例</button>
           </div>
 
           <div class="camera-summary">
@@ -1085,12 +1085,10 @@
       }
     });
 
-    // ============== 摄像头 & 多码识别（模拟） ==============
+    // ============== 摄像头 & 多码识别（示例） ==============
     const mockRecognizedCodes = [
-      { code: "SN1234567890", type: "二维码" },
-      { code: "SN2233445566", type: "二维码" },
-      { code: "SN0000000000", type: "一维码" },
-      { code: "SN9988776655", type: "二维码" }
+      { code: "SKYWA8EFF0AD", type: "一维码" },
+      { code: "ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type: "二维码" }
     ];
 
     const cameraVideo = document.getElementById('cameraVideo');
@@ -1132,6 +1130,19 @@
         cameraStatus.textContent = '摄像头已开启';
         btnOpenCamera.disabled = true;
         btnStopCamera.disabled = false;
+
+        // 打开摄像头后 2 秒 自动识别一维码 + 二维码
+        setTimeout(() => {
+          renderCodeTags(mockRecognizedCodes);
+          const first = mockRecognizedCodes[0];
+          if (first) {
+            const firstTag = document.querySelector('.code-tag[data-index="0"]');
+            if (firstTag) {
+              firstTag.classList.add('active');
+            }
+            onCodeSelected(first);
+          }
+        }, 2000);
       } catch (e) {
         console.error(e);
         alert('摄像头开启失败：' + e.message);
@@ -1155,7 +1166,7 @@
         const span = document.createElement('span');
         span.style.fontSize = '10px';
         span.style.color = '#9ca3af';
-        span.textContent = '尚未识别到任何码，可点击“模拟识别多个码”查看多码识别与光标选项效果。';
+        span.textContent = '尚未识别到任何码，可点击“多码识别示例”查看多码识别与光标选项效果。';
         codeTagsContainer.appendChild(span);
         summaryCount.textContent = '0';
         summaryType.textContent = '-';
@@ -1195,17 +1206,16 @@
       summaryTime.textContent = now.toLocaleString();
     }
 
+    // 备用：点击“多码识别示例”按钮手动触发
     btnMockScan.addEventListener('click', () => {
       renderCodeTags(mockRecognizedCodes);
       const first = mockRecognizedCodes[0];
       if (first) {
-        setTimeout(() => {
-          const firstTag = document.querySelector('.code-tag[data-index="0"]');
-          if (firstTag) {
-            firstTag.classList.add('active');
-            onCodeSelected(first);
-          }
-        }, 0);
+        const firstTag = document.querySelector('.code-tag[data-index="0"]');
+        if (firstTag) {
+          firstTag.classList.add('active');
+        }
+        onCodeSelected(first);
       }
     });
 
@@ -1345,7 +1355,7 @@
       }
       renderOrderList();
 
-      // 扫完一台后自动关闭弹窗，模拟真实“扫码添加完成”
+      // 扫完一台后自动关闭弹窗
       scanModal.classList.remove('active');
     });
 
@@ -1363,7 +1373,7 @@
       appendTimeline('进入审批确认环节');
     });
 
-    // ============== 审批模拟 ==============
+    // ============== 审批演示 ==============
     btnSubmitApprove.addEventListener('click', () => {
       if (!currentOrder) {
         alert('请先完成订单基本信息并至少保存一次。');
@@ -1383,7 +1393,7 @@
 
     btnApprovePass.addEventListener('click', () => {
       if (!currentOrder || currentOrder.status !== '待审批') {
-        alert('当前订单尚未处于“待审批”状态，无法模拟审批通过。');
+        alert('当前订单尚未处于“待审批”状态，无法执行审批通过演示。');
         return;
       }
       setOrderStatus('已通过');
@@ -1400,7 +1410,7 @@
 
     btnApproveReject.addEventListener('click', () => {
       if (!currentOrder || currentOrder.status !== '待审批') {
-        alert('当前订单尚未处于“待审批”状态，无法模拟审批驳回。');
+        alert('当前订单尚未处于“待审批”状态，无法执行审批驳回演示。');
         return;
       }
       setOrderStatus('已驳回');
