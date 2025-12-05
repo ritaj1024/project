@@ -1,1 +1,1507 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AMS 家客终端管理 · 调拨出入库流程原型（扫码弹窗）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f3f4f6;
+    }
+    body { display: flex; justify-content: center; align-items: center; padding: 16px; }
+
+    .phone-frame {
+      width: 390px;
+      max-width: 100%;
+      height: 780px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    header {
+      height: 56px;
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    header .title-sub {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      background: #f3f4f6;
+      padding: 10px 12px 72px;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* 通用卡片 */
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .card-subtitle {
+      font-size: 11px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .badge-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .badge-draft {
+      background: #eef2ff;
+      color: #4f46e5;
+    }
+    .badge-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .badge-pass {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .badge-reject {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    .step-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: #9ca3af;
+    }
+    .step-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      background: #fff;
+    }
+    .step-item.active .step-circle {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+    .step-item.active span.label {
+      color: #2563eb;
+      font-weight: 600;
+    }
+    .step-line {
+      position: relative;
+      top: 9px;
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    /* 表单 */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 8px;
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .form-label {
+      font-size: 11px;
+      color: #4b5563;
+    }
+    .form-label span.required { color: #ef4444; margin-left: 2px; }
+    input[type="text"], select, textarea {
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      padding: 4px 8px;
+      font-size: 11px;
+      outline: none;
+      resize: none;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.2);
+    }
+    textarea { min-height: 40px; }
+
+    .btn {
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,#2563eb,#1d4ed8);
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .btn-outline {
+      background: #fff;
+      border-color: #d1d5db;
+    }
+    .btn-danger {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+    .btn-ghost-dark {
+      background: transparent;
+      border-color: rgba(148,163,184,0.8);
+      color: #e5e7eb;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 8px 0;
+    }
+
+    .hint {
+      font-size: 10px;
+      color: #6b7280;
+    }
+
+    /* 摄像头识别框（在弹窗里使用） */
+    .camera-box {
+      border-radius: 14px;
+      background: #020617;
+      padding: 8px 8px 10px;
+      color: #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+    .camera-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      margin-bottom: 4px;
+      color: #e5e7eb;
+      opacity: 0.9;
+    }
+    .camera-view {
+      position: relative;
+      border-radius: 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.9);
+      overflow: hidden;
+      height: 200px;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+    }
+    video#cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .camera-overlay {
+      pointer-events: none;
+      position: absolute;
+      inset: 8px;
+      border-radius: 10px;
+    }
+    .corner {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #38bdf8;
+    }
+    .corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+    .corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+    .corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+    .corner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+    .scan-line {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 50%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #22c55e, transparent);
+      box-shadow: 0 0 5px #22c55e;
+      opacity: 0.9;
+    }
+
+    .code-tags {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .code-tag {
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: #e5e7eb;
+    }
+    .code-tag-type {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.4);
+      color: #bfdbfe;
+    }
+    .code-tag.active {
+      border-color: #38bdf8;
+      background: rgba(15, 118, 110, 0.9);
+    }
+
+    .camera-summary {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 6px;
+      font-size: 10px;
+    }
+    .camera-summary-block {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 8px;
+      padding: 6px 7px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      color: #e5e7eb;
+    }
+    .camera-summary-title {
+      font-size: 10px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .camera-summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+    .camera-summary-row span.key { color: #9ca3af; }
+    .camera-summary-row span.val { color: #f9fafb; }
+
+    /* 串码信息比对 + 设备清单 */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 10px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .info-item-label {
+      color: #6b7280;
+      margin-bottom: 1px;
+    }
+    .info-item-value {
+      font-weight: 500;
+      color: #111827;
+      min-height: 16px;
+    }
+    .info-item-value.bad { color: #b91c1c; }
+    .info-item-value.good { color: #15803d; }
+
+    .device-list {
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      max-height: 160px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+    .device-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-bottom: 1px dashed #e5e7eb;
+      align-items: center;
+    }
+    .device-row:last-child { border-bottom: none; }
+    .device-meta {
+      max-width: 230px;
+    }
+    .device-meta-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 审批部分 */
+    .timeline {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #4b5563;
+    }
+    .timeline-item {
+      position: relative;
+      padding-left: 12px;
+      margin-bottom: 4px;
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #2563eb;
+    }
+    .timeline-item::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 10px;
+      width: 1px;
+      height: 16px;
+      background: #e5e7eb;
+    }
+    .timeline-item:last-child::after { display: none; }
+
+    /* 订单列表 */
+    .order-item {
+      font-size: 11px;
+      padding: 8px 8px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 6px;
+      background: #fff;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      align-items: center;
+    }
+    .order-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .order-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .tag {
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 2px 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    /* 弹窗（扫码添加） */
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 30;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-panel {
+      width: 100%;
+      max-width: 360px;
+      max-height: 90%;
+      background: #f9fafb;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(15,23,42,0.4);
+      overflow-y: auto;
+      padding: 10px 12px 12px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .modal-subtitle {
+      font-size: 11px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+    .modal-close {
+      font-size: 20px;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    /* 底部 Tab */
+    .tab-bar {
+      height: 54px;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+      display: flex;
+    }
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #6b7280;
+      cursor: pointer;
+    }
+    .tab-item span.icon {
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+    .tab-item.active {
+      color: #2563eb;
+    }
+
+    .fade-in {
+      animation: fade-in 0.2s ease-out;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <header>
+      <div>
+        <div id="headerTitle">调拨出入库</div>
+        <div class="title-sub" id="headerSubTitle">订单创建 · 扫码添加 · 审批确认</div>
+      </div>
+      <div style="font-size: 20px;">⋮</div>
+    </header>
+
+    <main>
+      <!-- 调拨出入库主流程 -->
+      <section id="view-transfer" class="view active fade-in">
+        <!-- 步骤条 -->
+        <div class="card">
+          <div class="step-indicator">
+            <div class="step-item active" data-step="1">
+              <div class="step-circle">1</div>
+              <span class="label">创建订单</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="2">
+              <div class="step-circle">2</div>
+              <span class="label">扫码添加</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="3">
+              <div class="step-circle">3</div>
+              <span class="label">审批确认</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. 订单基本信息 -->
+        <div class="card">
+          <div class="card-header">
+            <span>订单基本信息</span>
+            <span id="orderStatusBadge" class="badge-status badge-draft">草稿</span>
+          </div>
+          <div class="card-subtitle">
+            填写调拨出入库订单信息，保存后可通过【扫码添加】录入设备，再通过审批确认完成此订单流程。
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">订单类型<span class="required">*</span></label>
+              <select id="fieldOrderType">
+                <option value="调拨出库">调拨出库</option>
+                <option value="调拨入库">调拨入库</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">订单编号</label>
+              <input id="fieldOrderNo" type="text" placeholder="系统自动生成" disabled />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">调出仓库<span class="required">*</span></label>
+              <input id="fieldFromStore" type="text" placeholder="" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">调入仓库<span class="required">*</span></label>
+              <input id="fieldToStore" type="text" placeholder="" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">创建人 / 工号<span class="required">*</span></label>
+              <input id="fieldCreator" type="text" placeholder="如：张三 / 1008611" value="张三 / 1008611" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">联系电话</label>
+              <input id="fieldPhone" type="text" placeholder="选填" />
+            </div>
+          </div>
+
+          <div class="form-field" style="margin-top:4px;">
+            <label class="form-label">备注说明</label>
+            <textarea id="fieldRemark" placeholder="如：用于某片区光猫调拨补货"></textarea>
+          </div>
+
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button id="btnSaveBasic" class="btn btn-primary">保存订单</button>
+            <button id="btnResetBasic" class="btn btn-outline">重置</button>
+          </div>
+          <div class="hint" style="margin-top:4px;">
+            ※ 保存后视为生成调拨出入库订单草稿，后续扫码设备与审批状态与此订单绑定。
+          </div>
+        </div>
+
+        <!-- 2. 扫码添加入口（弹出红框内容） -->
+        <div class="card">
+          <div class="card-header">
+            <span>扫码添加设备</span>
+            <span style="font-size:11px;color:#2563eb;">多码识别 · 光标选项</span>
+          </div>
+          <div class="card-subtitle">
+            点击【扫码添加】后弹出扫码界面，通过摄像头识别设备上的多个二维码、一维码，选择其中一个串码并加入本订单。
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button id="btnOpenScanModal" class="btn btn-primary">📷 扫码添加</button>
+            <span class="hint" style="align-self:center;">支持连续扫码多台设备，自动累计到设备清单。</span>
+          </div>
+        </div>
+
+        <!-- 本订单设备清单 + 审批入口 -->
+        <div class="card">
+          <div class="card-header">
+            <span>本订单设备清单</span>
+            <span style="font-size:11px;color:#6b7280;">
+              共 <span id="deviceCount">0</span> 台
+            </span>
+          </div>
+
+          <div id="deviceList" class="device-list">
+            <div style="font-size:11px;color:#9ca3af;padding:8px 8px;">
+              暂无设备，请先点击上方【扫码添加】录入设备。
+            </div>
+          </div>
+
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button id="btnGoApprove" class="btn btn-outline">下一步：提交审批</button>
+          </div>
+          <div class="hint" style="margin-top:4px;">
+            ※ 提交审批前建议完成本订单所有设备的扫码录入。
+          </div>
+        </div>
+
+        <!-- 3. 审批确认 -->
+        <div class="card">
+          <div class="card-header">
+            <span>审批与确认</span>
+            <span id="approveStatusBadge" class="badge-status badge-draft">草稿</span>
+          </div>
+          <div class="card-subtitle">
+            发起审批后，审批人可在此确认通过或驳回，流程结束后订单状态随之更新。
+          </div>
+
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <button id="btnSubmitApprove" class="btn btn-primary">📤 提交审批</button>
+            <button id="btnApprovePass" class="btn btn-outline">✅ 审批通过</button>
+            <button id="btnApproveReject" class="btn btn-danger">✖ 审批驳回</button>
+          </div>
+
+          <div class="hint">
+            ※ 实际实现中，提交审批后会流转至审批人端，这里采用“模拟审批通过 / 驳回”按钮快速演示流程完整性。
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="card-subtitle">订单流转记录</div>
+          <div id="timeline" class="timeline">
+            <div class="timeline-item">系统初始化订单流程（草稿）</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 订单列表视图 -->
+      <section id="view-orders" class="view">
+        <div class="card">
+          <div class="card-header">
+            <span>调拨出入库订单列表</span>
+            <span style="font-size:11px;color:#6b7280;">最近操作</span>
+          </div>
+          <div id="orderList">
+            <div style="font-size:11px;color:#9ca3af;">
+              暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 我的（占位） -->
+      <section id="view-profile" class="view">
+        <div class="card">
+          <div class="card-header">
+            <span>我的（占位）</span>
+          </div>
+          <div style="font-size:12px;color:#6b7280;">
+            这里可扩展装维个人信息、默认调出/调入仓库、扫码偏好配置等内容，当前用于占位。
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 扫码添加弹窗（红框框内容） -->
+    <div id="scanModal" class="modal-backdrop">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">扫码添加设备</div>
+            <div class="modal-subtitle">多码识别 · 光标选项 · 串码比对</div>
+          </div>
+          <div id="btnCloseScanModal" class="modal-close">✕</div>
+        </div>
+
+        <!-- 红框框主体：摄像头 + 多码识别 + 串码比对 + 加入订单 -->
+        <div class="camera-box">
+          <div class="camera-header-row">
+            <span>后置摄像头 · 实时取景</span>
+            <span id="cameraStatus">摄像头未开启</span>
+          </div>
+
+          <div class="camera-view">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <div class="camera-overlay">
+              <div class="corner tl"></div>
+              <div class="corner tr"></div>
+              <div class="corner bl"></div>
+              <div class="corner br"></div>
+              <div class="scan-line"></div>
+            </div>
+            <div id="codeTags" class="code-tags"></div>
+          </div>
+
+          <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
+            <button id="btnOpenCamera" class="btn btn-primary">📷 打开摄像头</button>
+            <button id="btnStopCamera" class="btn btn-ghost-dark btn" disabled>■ 关闭摄像头</button>
+            <button id="btnMockScan" class="btn btn-ghost-dark btn">✨ 模拟识别多个码</button>
+          </div>
+
+          <div class="camera-summary">
+            <div class="camera-summary-block">
+              <div class="camera-summary-title">识别摘要</div>
+              <div class="camera-summary-row">
+                <span class="key">识别码数量：</span>
+                <span class="val" id="summaryCount">0</span>
+              </div>
+              <div class="camera-summary-row">
+                <span class="key">二维码 / 一维码：</span>
+                <span class="val" id="summaryType">-</span>
+              </div>
+              <div class="camera-summary-row">
+                <span class="key">上次识别时间：</span>
+                <span class="val" id="summaryTime">-</span>
+              </div>
+            </div>
+            <div class="camera-summary-block">
+              <div class="camera-summary-title">当前光标串码</div>
+              <div class="camera-summary-row">
+                <span class="key">设备识别码：</span>
+                <span class="val" id="summaryCurrentCode">-</span>
+              </div>
+              <div class="camera-summary-row">
+                <span class="key">码制类型：</span>
+                <span class="val" id="summaryCurrentType">-</span>
+              </div>
+              <div class="camera-summary-row">
+                <span class="key">台账匹配：</span>
+                <span class="val" id="summaryCurrentResult">未比对</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:4px;">
+            ※ 多码标签即为“光标选项”，点击某个串码后自动触发台账比对，并可加入本订单设备清单。
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="info-grid">
+          <div>
+            <div class="info-item-label">设备识别码（串码）</div>
+            <div id="infoCode" class="info-item-value">-</div>
+          </div>
+          <div>
+            <div class="info-item-label">系统 SN</div>
+            <div id="infoSN" class="info-item-value">-</div>
+          </div>
+          <div>
+            <div class="info-item-label">管理域</div>
+            <div id="infoDomain" class="info-item-value">-</div>
+          </div>
+          <div>
+            <div class="info-item-label">终端类型</div>
+            <div id="infoType" class="info-item-value">-</div>
+          </div>
+          <div>
+            <div class="info-item-label">终端状态</div>
+            <div id="infoStatus" class="info-item-value">-</div>
+          </div>
+          <div>
+            <div class="info-item-label">库存位置</div>
+            <div id="infoLocation" class="info-item-value">-</div>
+          </div>
+        </div>
+
+        <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
+          <button id="btnAddDevice" class="btn btn-primary">➕ 加入本订单设备清单</button>
+          <span class="hint">※ 支持扫码多台设备，逐台加入本订单。</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部 Tab -->
+    <nav class="tab-bar">
+      <div class="tab-item active" data-view="transfer">
+        <span class="icon">🔁</span>
+        <span>调拨出入库</span>
+      </div>
+      <div class="tab-item" data-view="orders">
+        <span class="icon">📋</span>
+        <span>订单列表</span>
+      </div>
+      <div class="tab-item" data-view="profile">
+        <span class="icon">👤</span>
+        <span>我的</span>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    // ============== Tab 切换 ==============
+    const tabItems = document.querySelectorAll('.tab-item');
+    const views = {
+      transfer: document.getElementById('view-transfer'),
+      orders: document.getElementById('view-orders'),
+      profile: document.getElementById('view-profile')
+    };
+    const headerTitle = document.getElementById('headerTitle');
+    const headerSubTitle = document.getElementById('headerSubTitle');
+
+    const headerTextMap = {
+      transfer: {
+        title: '调拨出入库',
+        sub: '订单创建 · 扫码添加 · 审批确认'
+      },
+      orders: {
+        title: '订单列表',
+        sub: '查询历史调拨出入库订单'
+      },
+      profile: {
+        title: '我的',
+        sub: '装维信息与调拨偏好'
+      }
+    };
+
+    tabItems.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const viewKey = tab.getAttribute('data-view');
+
+        tabItems.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        Object.keys(views).forEach(key => {
+          if (key === viewKey) {
+            views[key].classList.add('active', 'fade-in');
+          } else {
+            views[key].classList.remove('active', 'fade-in');
+          }
+        });
+
+        headerTitle.textContent = headerTextMap[viewKey].title;
+        headerSubTitle.textContent = headerTextMap[viewKey].sub;
+      });
+    });
+
+    // ============== 步骤指示 ==============
+    function setStepActive(step) {
+      document.querySelectorAll('.step-item').forEach(el => {
+        const s = el.getAttribute('data-step');
+        if (Number(s) === step) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    // ============== 订单状态 & 数据模型 ==============
+    const orderStatusBadge = document.getElementById('orderStatusBadge');
+    const approveStatusBadge = document.getElementById('approveStatusBadge');
+    const deviceCountSpan = document.getElementById('deviceCount');
+    const deviceListContainer = document.getElementById('deviceList');
+    const timelineEl = document.getElementById('timeline');
+    const orderListEl = document.getElementById('orderList');
+
+    const fieldOrderType = document.getElementById('fieldOrderType');
+    const fieldOrderNo = document.getElementById('fieldOrderNo');
+    const fieldFromStore = document.getElementById('fieldFromStore');
+    const fieldToStore = document.getElementById('fieldToStore');
+    const fieldCreator = document.getElementById('fieldCreator');
+    const fieldPhone = document.getElementById('fieldPhone');
+    const fieldRemark = document.getElementById('fieldRemark');
+
+    const btnSaveBasic = document.getElementById('btnSaveBasic');
+    const btnResetBasic = document.getElementById('btnResetBasic');
+    const btnGoApprove = document.getElementById('btnGoApprove');
+    const btnSubmitApprove = document.getElementById('btnSubmitApprove');
+    const btnApprovePass = document.getElementById('btnApprovePass');
+    const btnApproveReject = document.getElementById('btnApproveReject');
+
+    let currentOrder = null;
+    let orderHistory = [];
+
+    function generateOrderNo() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const t = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+      return 'DBDD' + y + m + d + t;
+    }
+
+    function setOrderStatus(status) {
+      orderStatusBadge.textContent = status;
+      approveStatusBadge.textContent = status;
+      orderStatusBadge.className = 'badge-status';
+      approveStatusBadge.className = 'badge-status';
+      if (status === '草稿') {
+        orderStatusBadge.classList.add('badge-draft');
+        approveStatusBadge.classList.add('badge-draft');
+      } else if (status === '待审批') {
+        orderStatusBadge.classList.add('badge-pending');
+        approveStatusBadge.classList.add('badge-pending');
+      } else if (status === '已通过') {
+        orderStatusBadge.classList.add('badge-pass');
+        approveStatusBadge.classList.add('badge-pass');
+      } else if (status === '已驳回') {
+        orderStatusBadge.classList.add('badge-reject');
+        approveStatusBadge.classList.add('badge-reject');
+      }
+    }
+
+    function appendTimeline(text) {
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      const nowStr = new Date().toLocaleString();
+      item.textContent = nowStr + ' - ' + text;
+      timelineEl.appendChild(item);
+      timelineEl.scrollTop = timelineEl.scrollHeight;
+    }
+
+    function saveBasicInfo() {
+      const orderType = fieldOrderType.value;
+      const fromStore = fieldFromStore.value.trim();
+      const toStore = fieldToStore.value.trim();
+      const creator = fieldCreator.value.trim();
+      const phone = fieldPhone.value.trim();
+      const remark = fieldRemark.value.trim();
+
+      if (!fromStore || !toStore || !creator) {
+        alert('调出仓库、调入仓库、创建人/工号为必填项。');
+        return;
+      }
+
+      if (!currentOrder) {
+        const orderNo = generateOrderNo();
+        fieldOrderNo.value = orderNo;
+        currentOrder = {
+          orderNo,
+          type: orderType,
+          fromStore,
+          toStore,
+          creator,
+          phone,
+          remark,
+          devices: [],
+          status: '草稿',
+          createdAt: new Date().toISOString()
+        };
+        appendTimeline('创建订单草稿：' + orderNo);
+      } else {
+        currentOrder.type = orderType;
+        currentOrder.fromStore = fromStore;
+        currentOrder.toStore = toStore;
+        currentOrder.creator = creator;
+        currentOrder.phone = phone;
+        currentOrder.remark = remark;
+        appendTimeline('更新订单基本信息');
+      }
+
+      setOrderStatus('草稿');
+      setStepActive(2);
+      alert('订单基本信息已保存，可以点击【扫码添加】录入设备。');
+
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) {
+        orderHistory.unshift({ ...currentOrder });
+      } else {
+        orderHistory[idx] = { ...currentOrder };
+      }
+      renderOrderList();
+    }
+
+    function resetBasicInfo() {
+      fieldOrderType.value = '调拨出库';
+      fieldOrderNo.value = '';
+      fieldFromStore.value = '';
+      fieldToStore.value = '';
+      fieldCreator.value = '张三 / 1008611';
+      fieldPhone.value = '';
+      fieldRemark.value = '';
+      currentOrder = null;
+      setOrderStatus('草稿');
+      setStepActive(1);
+      timelineEl.innerHTML = '<div class="timeline-item">系统初始化订单流程（草稿）</div>';
+      renderDeviceList();
+    }
+
+    btnSaveBasic.addEventListener('click', saveBasicInfo);
+    btnResetBasic.addEventListener('click', resetBasicInfo);
+
+    // ============== 模拟终端台账数据 ==============
+    const terminalCatalog = {
+      "SN1234567890": {
+        sn: "SN1234567890",
+        domain: "家客宽带管理域",
+        type: "光猫",
+        status: "在库",
+        location: "成都 · 武侯区中心仓"
+      },
+      "SN2233445566": {
+        sn: "SN2233445566",
+        domain: "政企业务管理域",
+        type: "企业网关",
+        status: "在库",
+        location: "成都 · 高新区政企仓"
+      },
+      "SN9988776655": {
+        sn: "SN9988776655",
+        domain: "家客宽带管理域",
+        type: "机顶盒",
+        status: "已装机",
+        location: "用户现场 · 成都市成华区"
+      }
+    };
+
+    // ============== 扫码弹窗开关 ==============
+    const scanModal = document.getElementById('scanModal');
+    const btnOpenScanModal = document.getElementById('btnOpenScanModal');
+    const btnCloseScanModal = document.getElementById('btnCloseScanModal');
+
+    btnOpenScanModal.addEventListener('click', () => {
+      if (!currentOrder) {
+        alert('请先保存订单基本信息，再进行扫码。');
+        return;
+      }
+      scanModal.classList.add('active');
+      setStepActive(2);
+    });
+
+    btnCloseScanModal.addEventListener('click', () => {
+      scanModal.classList.remove('active');
+    });
+
+    scanModal.addEventListener('click', (e) => {
+      if (e.target === scanModal) {
+        scanModal.classList.remove('active');
+      }
+    });
+
+    // ============== 摄像头 & 多码识别 ==============
+    const mockRecognizedCodes = [
+      { code: "SN1234567890", type: "二维码" },
+      { code: "SN2233445566", type: "二维码" },
+      { code: "SN0000000000", type: "一维码" },
+      { code: "SN9988776655", type: "二维码" }
+    ];
+
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const btnOpenCamera = document.getElementById('btnOpenCamera');
+    const btnStopCamera = document.getElementById('btnStopCamera');
+    const btnMockScan = document.getElementById('btnMockScan');
+    const codeTagsContainer = document.getElementById('codeTags');
+
+    const summaryCount = document.getElementById('summaryCount');
+    const summaryType = document.getElementById('summaryType');
+    const summaryTime = document.getElementById('summaryTime');
+    const summaryCurrentCode = document.getElementById('summaryCurrentCode');
+    const summaryCurrentType = document.getElementById('summaryCurrentType');
+    const summaryCurrentResult = document.getElementById('summaryCurrentResult');
+
+    const infoCode = document.getElementById('infoCode');
+    const infoSN = document.getElementById('infoSN');
+    const infoDomain = document.getElementById('infoDomain');
+    const infoType = document.getElementById('infoType');
+    const infoStatus = document.getElementById('infoStatus');
+    const infoLocation = document.getElementById('infoLocation');
+
+    let currentStream = null;
+    let currentCode = null;
+    let currentSelectedItem = null;
+
+    btnOpenCamera.addEventListener('click', async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
+          return;
+        }
+        currentStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false
+        });
+        cameraVideo.srcObject = currentStream;
+        cameraStatus.textContent = '摄像头已开启';
+        btnOpenCamera.disabled = true;
+        btnStopCamera.disabled = false;
+      } catch (e) {
+        console.error(e);
+        alert('摄像头开启失败：' + e.message);
+      }
+    });
+
+    btnStopCamera.addEventListener('click', () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
+      }
+      cameraVideo.srcObject = null;
+      cameraStatus.textContent = '摄像头未开启';
+      btnOpenCamera.disabled = false;
+      btnStopCamera.disabled = true;
+    });
+
+    function renderCodeTags(codes) {
+      codeTagsContainer.innerHTML = '';
+      if (!codes || codes.length === 0) {
+        const span = document.createElement('span');
+        span.style.fontSize = '10px';
+        span.style.color = '#9ca3af';
+        span.textContent = '尚未识别到任何码，可点击“模拟识别多个码”查看多码识别与光标选项效果。';
+        codeTagsContainer.appendChild(span);
+        summaryCount.textContent = '0';
+        summaryType.textContent = '-';
+        summaryTime.textContent = '-';
+        return;
+      }
+
+      let typeSet = new Set();
+      codes.forEach((item, idx) => {
+        typeSet.add(item.type);
+        const tag = document.createElement('div');
+        tag.className = 'code-tag';
+        tag.dataset.index = idx;
+
+        const typeSpan = document.createElement('span');
+        typeSpan.className = 'code-tag-type';
+        typeSpan.textContent = item.type;
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = item.code;
+
+        tag.appendChild(typeSpan);
+        tag.appendChild(textSpan);
+
+        tag.addEventListener('click', () => {
+          document.querySelectorAll('.code-tag').forEach(el => el.classList.remove('active'));
+          tag.classList.add('active');
+          onCodeSelected(item);
+        });
+
+        codeTagsContainer.appendChild(tag);
+      });
+
+      summaryCount.textContent = codes.length.toString();
+      summaryType.textContent = Array.from(typeSet).join(' / ');
+      const now = new Date();
+      summaryTime.textContent = now.toLocaleString();
+    }
+
+    btnMockScan.addEventListener('click', () => {
+      renderCodeTags(mockRecognizedCodes);
+      const first = mockRecognizedCodes[0];
+      if (first) {
+        setTimeout(() => {
+          const firstTag = document.querySelector('.code-tag[data-index="0"]');
+          if (firstTag) {
+            firstTag.classList.add('active');
+            onCodeSelected(first);
+          }
+        }, 0);
+      }
+    });
+
+    function onCodeSelected(item) {
+      currentCode = item.code;
+      currentSelectedItem = item;
+      summaryCurrentCode.textContent = item.code;
+      summaryCurrentType.textContent = item.type;
+
+      const record = terminalCatalog[item.code];
+      if (record) {
+        infoCode.textContent = item.code;
+        infoSN.textContent = record.sn;
+        infoDomain.textContent = record.domain;
+        infoType.textContent = record.type;
+        infoStatus.textContent = record.status;
+        infoLocation.textContent = record.location;
+
+        summaryCurrentResult.textContent = '已找到系统终端台账记录';
+        summaryCurrentResult.className = '';
+        summaryCurrentResult.classList.add('good');
+      } else {
+        infoCode.textContent = item.code;
+        infoSN.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+        infoDomain.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+        infoType.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+        infoStatus.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+        infoLocation.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+
+        summaryCurrentResult.textContent = '未在系统台账中找到该串码';
+        summaryCurrentResult.className = '';
+        summaryCurrentResult.classList.add('bad');
+      }
+    }
+
+    // ============== 设备清单操作 ==============
+    const btnAddDevice = document.getElementById('btnAddDevice');
+
+    function renderDeviceList() {
+      deviceListContainer.innerHTML = '';
+      if (!currentOrder || !currentOrder.devices.length) {
+        const div = document.createElement('div');
+        div.style.fontSize = '11px';
+        div.style.color = '#9ca3af';
+        div.style.padding = '8px 8px';
+        div.textContent = '暂无设备，请先点击上方【扫码添加】录入设备。';
+        deviceListContainer.appendChild(div);
+        deviceCountSpan.textContent = '0';
+        return;
+      }
+      deviceCountSpan.textContent = currentOrder.devices.length.toString();
+
+      currentOrder.devices.forEach((dev, index) => {
+        const row = document.createElement('div');
+        row.className = 'device-row';
+
+        const meta = document.createElement('div');
+        meta.className = 'device-meta';
+
+        const line1 = document.createElement('div');
+        line1.className = 'device-meta-line';
+        line1.textContent = dev.code + ' | ' + dev.type;
+
+        const line2 = document.createElement('div');
+        line2.className = 'device-meta-line';
+        line2.style.fontSize = '10px';
+        line2.style.color = '#6b7280';
+        line2.textContent = dev.domain + ' · ' + dev.status;
+
+        const line3 = document.createElement('div');
+        line3.className = 'device-meta-line';
+        line3.style.fontSize = '10px';
+        line3.style.color = '#9ca3af';
+        line3.textContent = dev.location;
+
+        meta.appendChild(line1);
+        meta.appendChild(line2);
+        meta.appendChild(line3);
+
+        const actionBtn = document.createElement('button');
+        actionBtn.className = 'btn btn-outline';
+        actionBtn.style.fontSize = '10px';
+        actionBtn.textContent = '移除';
+        actionBtn.addEventListener('click', () => {
+          currentOrder.devices.splice(index, 1);
+          appendTimeline('移除设备：' + dev.code);
+          renderDeviceList();
+        });
+
+        row.appendChild(meta);
+        row.appendChild(actionBtn);
+        deviceListContainer.appendChild(row);
+      });
+    }
+
+    btnAddDevice.addEventListener('click', () => {
+      if (!currentOrder) {
+        alert('请先保存订单基本信息。');
+        return;
+      }
+      if (!currentCode || !currentSelectedItem) {
+        alert('请先在识别框中选择一个光标串码。');
+        return;
+      }
+
+      const record = terminalCatalog[currentCode] || {
+        sn: '-',
+        domain: '系统无记录',
+        type: '未知',
+        status: '未知',
+        location: '未知'
+      };
+
+      const exists = currentOrder.devices.some(d => d.code === currentCode);
+      if (exists) {
+        alert('该设备已在本订单清单中，无需重复添加。');
+        return;
+      }
+
+      currentOrder.devices.push({
+        code: currentCode,
+        sn: record.sn,
+        domain: record.domain,
+        type: record.type,
+        status: record.status,
+        location: record.location
+      });
+
+      appendTimeline('扫码并加入设备：' + currentCode);
+      renderDeviceList();
+
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) {
+        orderHistory.unshift({ ...currentOrder });
+      } else {
+        orderHistory[idx] = { ...currentOrder };
+      }
+      renderOrderList();
+
+      // 扫完一台后自动关闭弹窗，模拟真实“扫码添加完成”
+      scanModal.classList.remove('active');
+    });
+
+    btnGoApprove.addEventListener('click', () => {
+      if (!currentOrder) {
+        alert('请先保存订单基本信息。');
+        return;
+      }
+      if (!currentOrder.devices.length) {
+        if (!confirm('当前订单设备清单为空，确定要直接进入审批环节吗？')) {
+          return;
+        }
+      }
+      setStepActive(3);
+      appendTimeline('进入审批确认环节');
+    });
+
+    // ============== 审批模拟 ==============
+    btnSubmitApprove.addEventListener('click', () => {
+      if (!currentOrder) {
+        alert('请先完成订单基本信息并至少保存一次。');
+        return;
+      }
+      setOrderStatus('待审批');
+      currentOrder.status = '待审批';
+      appendTimeline('提交审批');
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) {
+        orderHistory.unshift({ ...currentOrder });
+      } else {
+        orderHistory[idx] = { ...currentOrder };
+      }
+      renderOrderList();
+    });
+
+    btnApprovePass.addEventListener('click', () => {
+      if (!currentOrder || currentOrder.status !== '待审批') {
+        alert('当前订单尚未处于“待审批”状态，无法模拟审批通过。');
+        return;
+      }
+      setOrderStatus('已通过');
+      currentOrder.status = '已通过';
+      appendTimeline('审批通过，订单流程完成');
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) {
+        orderHistory.unshift({ ...currentOrder });
+      } else {
+        orderHistory[idx] = { ...currentOrder };
+      }
+      renderOrderList();
+    });
+
+    btnApproveReject.addEventListener('click', () => {
+      if (!currentOrder || currentOrder.status !== '待审批') {
+        alert('当前订单尚未处于“待审批”状态，无法模拟审批驳回。');
+        return;
+      }
+      setOrderStatus('已驳回');
+      currentOrder.status = '已驳回';
+      appendTimeline('审批驳回，订单流程终止');
+      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
+      if (idx === -1) {
+        orderHistory.unshift({ ...currentOrder });
+      } else {
+        orderHistory[idx] = { ...currentOrder };
+      }
+      renderOrderList();
+    });
+
+    // ============== 订单列表渲染 ==============
+    function renderOrderList() {
+      orderListEl.innerHTML = '';
+      if (!orderHistory.length) {
+        const div = document.createElement('div');
+        div.style.fontSize = '11px';
+        div.style.color = '#9ca3af';
+        div.textContent = '暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。';
+        orderListEl.appendChild(div);
+        return;
+      }
+
+      orderHistory.forEach(order => {
+        const item = document.createElement('div');
+        item.className = 'order-item';
+
+        const header = document.createElement('div');
+        header.className = 'order-header';
+
+        const title = document.createElement('div');
+        title.className = 'order-title';
+        title.textContent = order.orderNo;
+
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'badge-status';
+        statusSpan.textContent = order.status;
+        if (order.status === '草稿') statusSpan.classList.add('badge-draft');
+        if (order.status === '待审批') statusSpan.classList.add('badge-pending');
+        if (order.status === '已通过') statusSpan.classList.add('badge-pass');
+        if (order.status === '已驳回') statusSpan.classList.add('badge-reject');
+
+        header.appendChild(title);
+        header.appendChild(statusSpan);
+
+        const meta1 = document.createElement('div');
+        meta1.className = 'order-meta';
+        const left1 = document.createElement('span');
+        left1.textContent = order.type + ' | 设备数：' + order.devices.length;
+        const right1 = document.createElement('span');
+        right1.textContent = '创建人：' + order.creator;
+        meta1.appendChild(left1);
+        meta1.appendChild(right1);
+
+        const meta2 = document.createElement('div');
+        meta2.className = 'order-meta';
+        const left2 = document.createElement('span');
+        left2.textContent = '调出：' + order.fromStore;
+        const right2 = document.createElement('span');
+        right2.textContent = '调入：' + order.toStore;
+        meta2.appendChild(left2);
+        meta2.appendChild(right2);
+
+        const tagRow = document.createElement('div');
+        tagRow.style.marginTop = '4px';
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = '点击回填到当前订单';
+        tagRow.appendChild(tag);
+
+        item.appendChild(header);
+        item.appendChild(meta1);
+        item.appendChild(meta2);
+        item.appendChild(tagRow);
+
+        item.addEventListener('click', () => {
+          currentOrder = { ...order };
+          fieldOrderType.value = order.type;
+          fieldOrderNo.value = order.orderNo;
+          fieldFromStore.value = order.fromStore;
+          fieldToStore.value = order.toStore;
+          fieldCreator.value = order.creator;
+          fieldPhone.value = order.phone || '';
+          fieldRemark.value = order.remark || '';
+          setOrderStatus(order.status);
+          renderDeviceList();
+          appendTimeline('从订单列表回填订单：' + order.orderNo);
+          document.querySelector('.tab-item[data-view="transfer"]').click();
+        });
+
+        orderListEl.appendChild(item);
+      });
+    }
+
+    // 初始化
+    renderDeviceList();
+    renderCodeTags([]);
+  </script>
+</body>
+</html>
