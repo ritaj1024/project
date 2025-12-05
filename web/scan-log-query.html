@@ -1,0 +1,716 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AMS 家客终端管理 · 扫码记录查询</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 左侧菜单 */
+    .sidebar {
+      width: 220px;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 16px 12px;
+    }
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sidebar-title span.logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: linear-gradient(135deg,#2563eb,#06b6d4);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .menu-group-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin: 12px 4px 6px;
+    }
+    .menu-item {
+      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .menu-item span.left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .menu-item:hover {
+      background: #1f2937;
+    }
+    .menu-item.active {
+      background: #2563eb;
+      color: #fff;
+    }
+    .menu-sub {
+      margin-top: 4px;
+      margin-left: 26px;
+      border-left: 1px solid #374151;
+      padding-left: 6px;
+    }
+    .menu-sub-item {
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #d1d5db;
+    }
+    .menu-sub-item.active {
+      background: rgba(37,99,235,0.25);
+      color: #fff;
+    }
+    .menu-sub-item:hover {
+      background: #1f2937;
+    }
+
+    /* 右侧内容区 */
+    .content {
+      flex: 1;
+      padding: 16px 20px 24px;
+    }
+
+    .breadcrumb {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+    .breadcrumb span.sep {
+      margin: 0 4px;
+    }
+
+    .page-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .page-title-main {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .page-title-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,#2563eb,#1d4ed8);
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* 卡片 */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-title::before {
+      content: "";
+      width: 3px;
+      height: 14px;
+      border-radius: 999px;
+      background: #2563eb;
+    }
+    .card-subtitle {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* 查询条件 */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .filter-label {
+      color: #4b5563;
+    }
+    .filter-label .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+    .filter-input, .filter-select {
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 5px 8px;
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+    }
+    .filter-input:focus, .filter-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.15);
+    }
+
+    .filter-actions {
+      margin-top: 4px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* 表格 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    thead {
+      background: #f3f4f6;
+    }
+    th, td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      color: #4b5563;
+      font-weight: 500;
+    }
+    tbody tr:hover {
+      background: #f9fafb;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .badge-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .badge-fail {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .badge-warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .text-muted {
+      color: #6b7280;
+    }
+    .link-btn {
+      font-size: 12px;
+      color: #2563eb;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      padding: 0;
+    }
+
+    /* 分页 */
+    .table-footer {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .pagination {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .pagination button {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      cursor: pointer;
+    }
+    .pagination button.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- 左侧菜单 -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <span class="logo">A</span>
+      <span>AMS 家客终端管理</span>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-title">终端运营</div>
+      <div class="menu-item">
+        <span class="left">
+          <span>📦</span>
+          <span>调拨出入库</span>
+        </span>
+      </div>
+      <!-- 其他菜单略 -->
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-title">风控 & 记录</div>
+      <div class="menu-item active">
+        <span class="left">
+          <span>📷</span>
+          <span>扫码记录管理</span>
+        </span>
+        <span>▾</span>
+      </div>
+      <div class="menu-sub">
+        <div class="menu-sub-item active">扫码记录查询</div>
+        <!-- 预留：扫码质量分析等 -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- 右侧内容 -->
+  <main class="content">
+    <div class="breadcrumb">
+      首页 <span class="sep">/</span> 扫码记录管理 <span class="sep">/</span> 扫码记录查询
+    </div>
+
+    <div class="page-title-row">
+      <div>
+        <div class="page-title-main">扫码记录查询</div>
+        <div class="page-title-sub">
+          查询并导出 APP 端调拨出入库扫码记录，串联扫码行为与业务工单。
+        </div>
+      </div>
+      <div class="page-actions">
+        <button id="btnExport" class="btn">⬇ 导出</button>
+        <button class="btn">⚙ 字段配置</button>
+      </div>
+    </div>
+
+    <!-- 查询条件 -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">查询条件</div>
+        <div class="card-subtitle">支持按业务类型、时间、操作人、工单号、扫码结果等维度组合过滤。</div>
+      </div>
+
+      <div class="filter-grid">
+        <div class="filter-item">
+          <label class="filter-label">业务类型</label>
+          <select id="fBizType" class="filter-select">
+            <option value="">全部</option>
+            <option value="调拨出库">调拨出库</option>
+            <option value="调拨入库">调拨入库</option>
+            <option value="装机出库">装机出库</option>
+            <option value="回收入库">回收入库</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">扫码结果</label>
+          <select id="fResultType" class="filter-select">
+            <option value="">全部</option>
+            <option value="成功">成功</option>
+            <option value="台账无记录">台账无记录</option>
+            <option value="重复扫码">重复扫码</option>
+            <option value="校验失败">校验失败</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">业务工单号 / 订单号</label>
+          <input id="fOrderNo" class="filter-input" placeholder="支持模糊查询">
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">设备识别码（串码）</label>
+          <input id="fCode" class="filter-input" placeholder="SN 或条码内容">
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">操作人姓名 / 工号</label>
+          <input id="fOperator" class="filter-input" placeholder="如：张三 / 1008611">
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">扫码来源</label>
+          <select id="fSource" class="filter-select">
+            <option value="">全部</option>
+            <option value="装维APP">装维APP</option>
+            <option value="仓库WEB">仓库WEB</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">操作时间起</label>
+          <input id="fTimeStart" type="datetime-local" class="filter-input">
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">操作时间止</label>
+          <input id="fTimeEnd" type="datetime-local" class="filter-input">
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button id="btnReset" class="btn">重置</button>
+        <button id="btnSearch" class="btn btn-primary">🔍 查询</button>
+      </div>
+    </section>
+
+    <!-- 查询结果 -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">扫码记录列表</div>
+        <div class="card-subtitle">
+          记录 APP 端每一次扫码行为的关键字段：业务类型、操作人、工单号、设备识别码、返回结果等。
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="resultTable">
+          <thead>
+          <tr>
+            <th>序号</th>
+            <th>业务类型</th>
+            <th>业务工单号</th>
+            <th>设备识别码</th>
+            <th>扫码结果</th>
+            <th>台账匹配结果</th>
+            <th>返回结果描述</th>
+            <th>操作人</th>
+            <th>扫码来源</th>
+            <th>操作时间</th>
+            <th>耗时(ms)</th>
+            <th>请求ID</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody id="resultBody">
+          <!-- JS 填充 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <div id="summaryText">共 0 条记录</div>
+        <div class="pagination">
+          <button id="prevPage">&lt;</button>
+          <button id="pageInfo" class="active">1 / 1</button>
+          <button id="nextPage">&gt;</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  // 模拟扫码记录数据（后续可替换为接口返回）
+  const allRecords = [
+    {
+      bizType: '调拨出库',
+      orderNo: 'DBDD202412050930',
+      code: 'SN1234567890',
+      resultType: '成功',
+      ledgerMatch: '已匹配台账',
+      resultMsg: '校验通过，加入调拨出库订单。',
+      operator: '张三 / 1008611',
+      source: '装维APP',
+      opTime: '2024-12-05 09:30:21',
+      durationMs: 128,
+      requestId: 'REQ-20241205-0001'
+    },
+    {
+      bizType: '调拨出库',
+      orderNo: 'DBDD202412050930',
+      code: 'SN2233445566',
+      resultType: '台账无记录',
+      ledgerMatch: '系统无记录',
+      resultMsg: '未在终端台账中找到对应串码。',
+      operator: '张三 / 1008611',
+      source: '装维APP',
+      opTime: '2024-12-05 09:31:02',
+      durationMs: 156,
+      requestId: 'REQ-20241205-0002'
+    },
+    {
+      bizType: '调拨入库',
+      orderNo: 'DBDD202412041530',
+      code: 'SN9988776655',
+      resultType: '重复扫码',
+      ledgerMatch: '已在本单清单中',
+      resultMsg: '当前订单已存在该设备，系统阻止重复入库。',
+      operator: '李四 / 1008612',
+      source: '装维APP',
+      opTime: '2024-12-04 15:30:47',
+      durationMs: 102,
+      requestId: 'REQ-20241204-0201'
+    },
+    {
+      bizType: '装机出库',
+      orderNo: 'ZJDD202412031110',
+      code: 'SN0000000000',
+      resultType: '校验失败',
+      ledgerMatch: '串码与终端类型不符',
+      resultMsg: '装机工单要求“光猫”，当前串码台账类型为“机顶盒”，校验不通过。',
+      operator: '王五 / 1008613',
+      source: '装维APP',
+      opTime: '2024-12-03 11:10:05',
+      durationMs: 210,
+      requestId: 'REQ-20241203-0309'
+    }
+  ];
+
+  let filteredRecords = [...allRecords];
+  let pageSize = 10;
+  let currentPage = 1;
+
+  const resultBody = document.getElementById('resultBody');
+  const summaryText = document.getElementById('summaryText');
+  const pageInfo = document.getElementById('pageInfo');
+  const prevPageBtn = document.getElementById('prevPage');
+  const nextPageBtn = document.getElementById('nextPage');
+
+  function renderTable() {
+    resultBody.innerHTML = '';
+    const total = filteredRecords.length;
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+    if (currentPage > pageCount) currentPage = pageCount;
+
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    const pageData = filteredRecords.slice(start, end);
+
+    pageData.forEach((rec, idx) => {
+      const tr = document.createElement('tr');
+
+      const tdIndex = document.createElement('td');
+      tdIndex.textContent = start + idx + 1;
+      tr.appendChild(tdIndex);
+
+      const tdBizType = document.createElement('td');
+      tdBizType.textContent = rec.bizType;
+      tr.appendChild(tdBizType);
+
+      const tdOrderNo = document.createElement('td');
+      const link = document.createElement('button');
+      link.className = 'link-btn';
+      link.textContent = rec.orderNo;
+      link.title = '点击跳转至调拨出入库订单详情（示意）';
+      link.onclick = () => alert('此处可跳转到订单详情页：' + rec.orderNo);
+      tdOrderNo.appendChild(link);
+      tr.appendChild(tdOrderNo);
+
+      const tdCode = document.createElement('td');
+      tdCode.textContent = rec.code;
+      tr.appendChild(tdCode);
+
+      const tdResult = document.createElement('td');
+      const spanResult = document.createElement('span');
+      spanResult.className = 'badge ';
+      if (rec.resultType === '成功') {
+        spanResult.className += 'badge-success';
+      } else if (rec.resultType === '台账无记录' || rec.resultType === '校验失败') {
+        spanResult.className += 'badge-fail';
+      } else {
+        spanResult.className += 'badge-warn';
+      }
+      spanResult.textContent = rec.resultType;
+      tdResult.appendChild(spanResult);
+      tr.appendChild(tdResult);
+
+      const tdLedger = document.createElement('td');
+      tdLedger.textContent = rec.ledgerMatch;
+      tr.appendChild(tdLedger);
+
+      const tdMsg = document.createElement('td');
+      tdMsg.textContent = rec.resultMsg;
+      tr.appendChild(tdMsg);
+
+      const tdOp = document.createElement('td');
+      tdOp.textContent = rec.operator;
+      tr.appendChild(tdOp);
+
+      const tdSource = document.createElement('td');
+      tdSource.textContent = rec.source;
+      tr.appendChild(tdSource);
+
+      const tdTime = document.createElement('td');
+      tdTime.textContent = rec.opTime;
+      tr.appendChild(tdTime);
+
+      const tdDur = document.createElement('td');
+      tdDur.textContent = rec.durationMs;
+      tr.appendChild(tdDur);
+
+      const tdReq = document.createElement('td');
+      tdReq.textContent = rec.requestId;
+      tr.appendChild(tdReq);
+
+      const tdAction = document.createElement('td');
+      const btnDetail = document.createElement('button');
+      btnDetail.className = 'link-btn';
+      btnDetail.textContent = '查看报文';
+      btnDetail.onclick = () => {
+        alert(
+          '这里可展示请求/响应报文明细\n\n' +
+          '请求ID：' + rec.requestId + '\n' +
+          '业务工单号：' + rec.orderNo + '\n' +
+          '设备识别码：' + rec.code + '\n' +
+          '返回结果：' + rec.resultMsg
+        );
+      };
+      tdAction.appendChild(btnDetail);
+      tr.appendChild(tdAction);
+
+      resultBody.appendChild(tr);
+    });
+
+    summaryText.textContent = `共 ${total} 条记录`;
+    pageInfo.textContent = `${currentPage} / ${pageCount}`;
+  }
+
+  function applyFilter() {
+    const fBizType = document.getElementById('fBizType').value.trim();
+    const fResultType = document.getElementById('fResultType').value.trim();
+    const fOrderNo = document.getElementById('fOrderNo').value.trim();
+    const fCode = document.getElementById('fCode').value.trim();
+    const fOperator = document.getElementById('fOperator').value.trim();
+    const fSource = document.getElementById('fSource').value.trim();
+    const fTimeStart = document.getElementById('fTimeStart').value;
+    const fTimeEnd = document.getElementById('fTimeEnd').value;
+
+    filteredRecords = allRecords.filter(rec => {
+      if (fBizType && rec.bizType !== fBizType) return false;
+      if (fResultType && rec.resultType !== fResultType) return false;
+      if (fSource && rec.source !== fSource) return false;
+      if (fOrderNo && !rec.orderNo.includes(fOrderNo)) return false;
+      if (fCode && !rec.code.includes(fCode)) return false;
+      if (fOperator && !rec.operator.includes(fOperator)) return false;
+
+      if (fTimeStart) {
+        const tStart = new Date(fTimeStart.replace('T', ' '));
+        const tRec = new Date(rec.opTime.replace(/-/g, '/'));
+        if (tRec < tStart) return false;
+      }
+      if (fTimeEnd) {
+        const tEnd = new Date(fTimeEnd.replace('T', ' '));
+        const tRec = new Date(rec.opTime.replace(/-/g, '/'));
+        if (tRec > tEnd) return false;
+      }
+
+      return true;
+    });
+
+    currentPage = 1;
+    renderTable();
+  }
+
+  document.getElementById('btnSearch').addEventListener('click', applyFilter);
+  document.getElementById('btnReset').addEventListener('click', () => {
+    document.querySelectorAll('.filter-input').forEach(i => i.value = '');
+    document.querySelectorAll('.filter-select').forEach(s => s.value = '');
+    filteredRecords = [...allRecords];
+    currentPage = 1;
+    renderTable();
+  });
+
+  prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+  nextPageBtn.addEventListener('click', () => {
+    const pageCount = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
+    if (currentPage < pageCount) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('btnExport').addEventListener('click', () => {
+    // 这里仅做示意，实际可改为导出 CSV / Excel
+    alert(`导出当前查询结果，共 ${filteredRecords.length} 条记录（可对接后端导出接口）。`);
+  });
+
+  // 初始化
+  renderTable();
+</script>
+</body>
+</html>
