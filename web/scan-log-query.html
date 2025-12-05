@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>家宽运维支撑系统 · 扫码记录查询</title>
+  <title>家宽运维支撑系统 · 扫码记录查询 / 故障终端查询</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -135,7 +135,7 @@
       color: #6b7280;
     }
 
-    /* 筛选卡片 */
+    /* 卡片 */
     .card {
       background: #ffffff;
       border-radius: 10px;
@@ -296,7 +296,7 @@
       border-color: #2563eb;
     }
 
-    /* 弹窗 */
+    /* 弹窗（扫码记录详情复用原有） */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -364,6 +364,10 @@
       white-space: pre-wrap;
       word-break: break-all;
     }
+
+    /* 视图切换简单动画 */
+    .view-section { display: none; }
+    .view-section.active { display: block; }
   </style>
 </head>
 <body>
@@ -388,8 +392,11 @@
         <span>扫码记录管理</span>
       </div>
       <div class="submenu">
-        <div class="submenu-item active">
+        <div class="submenu-item active" data-view="scan-log">
           <span>扫码记录查询</span>
+        </div>
+        <div class="submenu-item" data-view="fault-log">
+          <span>故障终端查询</span>
         </div>
       </div>
     </div>
@@ -409,134 +416,277 @@
     </header>
 
     <main class="content">
-      <div class="page-title">
-        <div>
-          扫码记录查询
-          <div class="page-title-sub">查询并导出 APP 端调拨出入库扫码行为与业务工单的关联记录</div>
-        </div>
-        <button id="btnExport" class="btn btn-secondary">⬇ 导出当前结果</button>
-      </div>
-
-      <!-- 筛选条件 -->
-      <section class="card">
-        <div class="filter-grid">
-          <div class="form-item">
-            <label class="form-label">业务类型</label>
-            <div class="form-control">
-              <select id="filterBizType">
-                <option value="">全部</option>
-                <option value="调拨出库">调拨出库</option>
-                <option value="调拨入库">调拨入库</option>
-              </select>
-            </div>
+      <!-- 扫码记录查询视图 -->
+      <section id="view-scan-log" class="view-section active">
+        <div class="page-title">
+          <div>
+            扫码记录查询
+            <div class="page-title-sub">查询并导出 APP 端调拨出入库扫码行为与业务工单的关联记录</div>
           </div>
-
-          <div class="form-item">
-            <label class="form-label">扫码结果</label>
-            <div class="form-control">
-              <select id="filterScanResult">
-                <option value="">全部</option>
-                <option value="成功">成功</option>
-                <option value="台账无记录">台账无记录</option>
-                <option value="重复扫码">重复扫码</option>
-                <option value="校验失败">校验失败</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-item">
-            <label class="form-label">扫码来源</label>
-            <div class="form-control">
-              <select id="filterSource">
-                <option value="">全部</option>
-                <option value="装维APP">装维APP</option>
-                <option value="WEB">WEB</option>
-                <option value="接口服务">接口服务</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-item">
-            <label class="form-label">业务工单号 / 订单号</label>
-            <div class="form-control">
-              <input id="filterBizOrderNo" type="text" placeholder="支持模糊查询">
-            </div>
-          </div>
-
-          <div class="form-item">
-            <label class="form-label">设备识别码（串码）</label>
-            <div class="form-control">
-              <input id="filterSn" type="text" placeholder="SN 或条码内容">
-            </div>
-          </div>
-
-          <div class="form-item">
-            <label class="form-label">操作人姓名 / 工号</label>
-            <div class="form-control">
-              <input id="filterOperator" type="text" placeholder="如：张三 / 1008611">
-            </div>
-          </div>
-
-          <div class="form-item">
-            <label class="form-label">操作时间起</label>
-            <div class="form-control">
-              <input id="filterStartDate" type="date">
-            </div>
-          </div>
-
-          <div class="form-item">
-            <label class="form-label">操作时间止</label>
-            <div class="form-control">
-              <input id="filterEndDate" type="date">
-            </div>
-          </div>
+          <button id="btnExport" class="btn btn-secondary">⬇ 导出当前结果</button>
         </div>
 
-        <div class="filter-actions">
-          <button id="btnReset" class="btn btn-outline">重置</button>
-          <button id="btnSearch" class="btn btn-primary">查询</button>
-        </div>
+        <!-- 筛选条件 -->
+        <section class="card">
+          <div class="filter-grid">
+            <div class="form-item">
+              <label class="form-label">业务类型</label>
+              <div class="form-control">
+                <select id="filterBizType">
+                  <option value="">全部</option>
+                  <option value="调拨出库">调拨出库</option>
+                  <option value="调拨入库">调拨入库</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">扫码结果</label>
+              <div class="form-control">
+                <select id="filterScanResult">
+                  <option value="">全部</option>
+                  <option value="成功">成功</option>
+                  <option value="台账无记录">台账无记录</option>
+                  <option value="重复扫码">重复扫码</option>
+                  <option value="校验失败">校验失败</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">扫码来源</label>
+              <div class="form-control">
+                <select id="filterSource">
+                  <option value="">全部</option>
+                  <option value="装维APP">装维APP</option>
+                  <option value="WEB">WEB</option>
+                  <option value="接口服务">接口服务</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">业务工单号 / 订单号</label>
+              <div class="form-control">
+                <input id="filterBizOrderNo" type="text" placeholder="支持模糊查询">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">设备识别码（串码）</label>
+              <div class="form-control">
+                <input id="filterSn" type="text" placeholder="SN 或条码内容">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">操作人姓名 / 工号</label>
+              <div class="form-control">
+                <input id="filterOperator" type="text" placeholder="如：张三 / 1008611">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">操作时间起</label>
+              <div class="form-control">
+                <input id="filterStartDate" type="date">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">操作时间止</label>
+              <div class="form-control">
+                <input id="filterEndDate" type="date">
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button id="btnReset" class="btn btn-outline">重置</button>
+            <button id="btnSearch" class="btn btn-primary">查询</button>
+          </div>
+        </section>
+
+        <!-- 结果列表 -->
+        <section class="table-wrapper">
+          <table>
+            <thead>
+            <tr>
+              <th style="width:40px;">序号</th>
+              <th>业务类型</th>
+              <th>业务工单号 / 订单号</th>
+              <th>设备识别码（串码）</th>
+              <th>扫码结果</th>
+              <th>台账匹配结果</th>
+              <th>返回结果描述</th>
+              <th>操作人</th>
+              <th>扫码来源</th>
+              <th>操作时间</th>
+              <th>耗时(ms)</th>
+              <th>请求ID</th>
+              <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="tableBody">
+            <!-- JS 渲染 -->
+            </tbody>
+          </table>
+
+          <div class="table-footer">
+            <span id="summaryText">共 0 条记录</span>
+            <div class="pager">
+              <button id="btnPrev">&lt;</button>
+              <button id="pageInfo" class="active">1 / 1</button>
+              <button id="btnNext">&gt;</button>
+            </div>
+          </div>
+        </section>
       </section>
 
-      <!-- 结果列表 -->
-      <section class="table-wrapper">
-        <table>
-          <thead>
-          <tr>
-            <th style="width:40px;">序号</th>
-            <th>业务类型</th>
-            <th>业务工单号 / 订单号</th>
-            <th>设备识别码（串码）</th>
-            <th>扫码结果</th>
-            <th>台账匹配结果</th>
-            <th>返回结果描述</th>
-            <th>操作人</th>
-            <th>扫码来源</th>
-            <th>操作时间</th>
-            <th>耗时(ms)</th>
-            <th>请求ID</th>
-            <th>操作</th>
-          </tr>
-          </thead>
-          <tbody id="tableBody">
-          <!-- JS 渲染 -->
-          </tbody>
-        </table>
-
-        <div class="table-footer">
-          <span id="summaryText">共 0 条记录</span>
-          <div class="pager">
-            <button id="btnPrev">&lt;</button>
-            <button id="pageInfo" class="active">1 / 1</button>
-            <button id="btnNext">&gt;</button>
+      <!-- 故障终端查询视图 -->
+      <section id="view-fault-log" class="view-section">
+        <div class="page-title">
+          <div>
+            故障终端查询
+            <div class="page-title-sub">查询并导出故障终端工单及关联设备信息，用于端到端闭环追踪</div>
           </div>
+          <button id="btnFaultExport" class="btn btn-secondary">⬇ 导出当前结果</button>
         </div>
+
+        <!-- 故障工单筛选 -->
+        <section class="card">
+          <div class="filter-grid">
+            <div class="form-item">
+              <label class="form-label">所属地市</label>
+              <div class="form-control">
+                <input id="filterFaultCity" type="text" placeholder="如：内蒙古·呼和浩特市">
+              </div>
+            </div>
+            <div class="form-item">
+              <label class="form-label">所属区县</label>
+              <div class="form-control">
+                <input id="filterFaultCounty" type="text" placeholder="如：新城区">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">故障来源</label>
+              <div class="form-control">
+                <select id="filterFaultSource">
+                  <option value="">全部</option>
+                  <option value="装维APP反馈">装维APP反馈</option>
+                  <option value="客户投诉">客户投诉</option>
+                  <option value="质检抽测">质检抽测</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">故障类型</label>
+              <div class="form-control">
+                <select id="filterFaultType">
+                  <option value="">全部</option>
+                  <option value="设备无法上电">设备无法上电</option>
+                  <option value="WiFi信号异常">WiFi信号异常</option>
+                  <option value="端口不可用">端口不可用</option>
+                  <option value="频繁掉线">频繁掉线</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">工单状态</label>
+              <div class="form-control">
+                <select id="filterFaultStatus">
+                  <option value="">全部</option>
+                  <option value="草稿">草稿</option>
+                  <option value="已提交">已提交</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">故障工单编号</label>
+              <div class="form-control">
+                <input id="filterFaultNo" type="text" placeholder="支持模糊查询">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">设备识别码 / SN</label>
+              <div class="form-control">
+                <input id="filterFaultSn" type="text" placeholder="终端串码或SN">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">反馈人 / 工号</label>
+              <div class="form-control">
+                <input id="filterFaultReporter" type="text" placeholder="如：李四 / 1008622">
+              </div>
+            </div>
+
+            <div class="form-item">
+              <label class="form-label">创建时间起</label>
+              <div class="form-control">
+                <input id="filterFaultStartDate" type="date">
+              </div>
+            </div>
+            <div class="form-item">
+              <label class="form-label">创建时间止</label>
+              <div class="form-control">
+                <input id="filterFaultEndDate" type="date">
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button id="btnFaultReset" class="btn btn-outline">重置</button>
+            <button id="btnFaultSearch" class="btn btn-primary">查询</button>
+          </div>
+        </section>
+
+        <!-- 故障工单列表 -->
+        <section class="table-wrapper">
+          <table>
+            <thead>
+            <tr>
+              <th style="width:40px;">序号</th>
+              <th>故障工单编号</th>
+              <th>工单状态</th>
+              <th>故障来源</th>
+              <th>所属地市</th>
+              <th>所属区县</th>
+              <th>故障类型</th>
+              <th>故障等级</th>
+              <th>设备SN</th>
+              <th>终端类型</th>
+              <th>反馈人</th>
+              <th>创建时间</th>
+              <th>故障图片数</th>
+            </tr>
+            </thead>
+            <tbody id="faultTableBody">
+            <!-- JS 渲染 -->
+            </tbody>
+          </table>
+
+          <div class="table-footer">
+            <span id="faultSummaryText">共 0 条记录</span>
+            <div class="pager">
+              <button id="btnFaultPrev">&lt;</button>
+              <button id="faultPageInfo" class="active">1 / 1</button>
+              <button id="btnFaultNext">&gt;</button>
+            </div>
+          </div>
+        </section>
       </section>
     </main>
   </div>
 </div>
 
-<!-- 详情弹窗 -->
+<!-- 扫码记录详情弹窗（原有逻辑） -->
 <div id="detailModal" class="modal-backdrop">
   <div class="modal">
     <div class="modal-header">
@@ -554,7 +704,34 @@
 </div>
 
 <script>
-  // ======== 模拟后端返回的“调拨出库 / 调拨入库”扫码记录 ========
+  // ========== 左侧子菜单切换视图 ==========
+  const submenuItems = document.querySelectorAll('.submenu-item');
+  const viewScanLog = document.getElementById('view-scan-log');
+  const viewFaultLog = document.getElementById('view-fault-log');
+  const breadcrumbCurrent = document.querySelector('.breadcrumb .current');
+  const topbarRight = document.querySelector('.topbar-right');
+
+  submenuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const viewKey = item.getAttribute('data-view');
+      submenuItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      if (viewKey === 'scan-log') {
+        viewScanLog.classList.add('active');
+        viewFaultLog.classList.remove('active');
+        breadcrumbCurrent.textContent = '扫码记录查询';
+        topbarRight.textContent = '支持按业务类型、扫码结果、操作人、工号、扫码来源等组合查询';
+      } else {
+        viewScanLog.classList.remove('active');
+        viewFaultLog.classList.add('active');
+        breadcrumbCurrent.textContent = '故障终端查询';
+        topbarRight.textContent = '支持按地市、故障类型、状态、设备串码等组合查询';
+      }
+    });
+  });
+
+  // ========== 模拟“调拨出库 / 调拨入库”扫码记录 ==========
   const allRows = [
     {
       id: 1,
@@ -602,7 +779,7 @@
       description: '校验通过，加入调拨入库订单',
       operator: '李四 / 1008612',
       source: '装维APP',
-      opTime: '2024-12-06 13:14:09',
+      opTime: '2024-12-04 13:14:09',
       duration: 102,
       reqId: 'REQ-20241204-0001',
       raw: {
@@ -610,7 +787,6 @@
         response: {  code: 0, msg: 'OK', match: true  }
       }
     },
-    
     {
       id: 4,
       bizType: '调拨出库',
@@ -723,7 +899,7 @@
     pageInfo.textContent = `${total === 0 ? 0 : currentPage} / ${Math.max(1, totalPages)}`;
   }
 
-  // 筛选
+  // 筛选（扫码记录）
   function applyFilter() {
     const bizType = document.getElementById('filterBizType').value.trim();
     const scanResult = document.getElementById('filterScanResult').value.trim();
@@ -788,7 +964,7 @@
     }
   });
 
-  // 详情弹框
+  // 详情弹框（扫码记录）
   const detailModal = document.getElementById('detailModal');
   const btnDetailClose = document.getElementById('btnDetailClose');
   const detailGrid = document.getElementById('detailGrid');
@@ -806,7 +982,7 @@
       ['操作人', row.operator],
       ['扫码来源', row.source],
       ['操作时间', row.opTime],
-      ['耗时(ms)', row.duration.toString()],
+      ['耗时(ms)', row.duration.toString() ],
       ['请求ID', row.reqId]
     ];
     fields.forEach(([label, value]) => {
@@ -835,7 +1011,7 @@
     }
   });
 
-  // 导出 CSV（导出当前筛选结果）
+  // 导出 CSV（扫码记录）
   document.getElementById('btnExport').addEventListener('click', () => {
     if (!currentFiltered.length) {
       alert('当前无可导出的记录。');
@@ -873,9 +1049,262 @@
     URL.revokeObjectURL(url);
   });
 
-  // 初始化
+  // 初始化扫码记录
   currentFiltered = [...allRows];
   renderTable();
+
+  // ========== 故障终端工单数据（来自 APP 故障终端闭环管理脚本结构） ==========
+  const faultRows = [
+    {
+      id: 1,
+      faultNo: 'GZGD202412050930',
+      status: '已提交',
+      source: '装维APP反馈',
+      city: '内蒙古·呼和浩特市',
+      county: '新城区',
+      faultType: '设备无法上电',
+      faultLevel: '重要',
+      deviceSn: 'SKYWA8EFF0AD',
+      deviceType: '光猫-家庭网关',
+      reporter: '李四 / 1008622',
+      createTime: '2024-12-05 09:45:10',
+      photoCount: 2
+    },
+    {
+      id: 2,
+      faultNo: 'GZGD202412041530',
+      status: '草稿',
+      source: '客户投诉',
+      city: '内蒙古·包头市',
+      county: '昆都仑区',
+      faultType: 'WiFi信号异常',
+      faultLevel: '一般',
+      deviceSn: 'SN1234567890',
+      deviceType: '光猫',
+      reporter: '王六 / 1008633',
+      createTime: '2024-12-04 15:32:21',
+      photoCount: 1
+    },
+    {
+      id: 3,
+      faultNo: 'GZGD202412031110',
+      status: '已提交',
+      source: '质检抽测',
+      city: '内蒙古·呼和浩特市',
+      county: '赛罕区',
+      faultType: '频繁掉线',
+      faultLevel: '紧急',
+      deviceSn: 'SN0000000000',
+      deviceType: '光猫-家庭网关',
+      reporter: '张三 / 1008611',
+      createTime: '2024-12-03 11:20:05',
+      photoCount: 3
+    }
+  ];
+
+  const faultPageSize = 10;
+  let faultCurrentPage = 1;
+  let faultCurrentFiltered = [...faultRows];
+
+  const faultTableBody = document.getElementById('faultTableBody');
+  const faultSummaryText = document.getElementById('faultSummaryText');
+  const faultPageInfo = document.getElementById('faultPageInfo');
+  const btnFaultPrev = document.getElementById('btnFaultPrev');
+  const btnFaultNext = document.getElementById('btnFaultNext');
+
+  function renderFaultTable() {
+    const total = faultCurrentFiltered.length;
+    const totalPages = Math.max(1, Math.ceil(total / faultPageSize));
+    if (faultCurrentPage > totalPages) faultCurrentPage = totalPages;
+
+    const start = (faultCurrentPage - 1) * faultPageSize;
+    const pageRows = faultCurrentFiltered.slice(start, start + faultPageSize);
+
+    faultTableBody.innerHTML = '';
+    pageRows.forEach((row, index) => {
+      const tr = document.createElement('tr');
+
+      const tdIndex = document.createElement('td');
+      tdIndex.textContent = start + index + 1;
+      tr.appendChild(tdIndex);
+
+      const tdNo = document.createElement('td');
+      tdNo.textContent = row.faultNo;
+      tr.appendChild(tdNo);
+
+      const tdStatus = document.createElement('td');
+      const tagStatus = document.createElement('span');
+      tagStatus.className = 'tag ' + (row.status === '已提交' ? 'tag-success' : 'tag-warning');
+      tagStatus.textContent = row.status;
+      tdStatus.appendChild(tagStatus);
+      tr.appendChild(tdStatus);
+
+      const tdSource = document.createElement('td');
+      tdSource.textContent = row.source;
+      tr.appendChild(tdSource);
+
+      const tdCity = document.createElement('td');
+      tdCity.textContent = row.city;
+      tr.appendChild(tdCity);
+
+      const tdCounty = document.createElement('td');
+      tdCounty.textContent = row.county;
+      tr.appendChild(tdCounty);
+
+      const tdType = document.createElement('td');
+      tdType.textContent = row.faultType;
+      tr.appendChild(tdType);
+
+      const tdLevel = document.createElement('td');
+      tdLevel.textContent = row.faultLevel;
+      tr.appendChild(tdLevel);
+
+      const tdSn = document.createElement('td');
+      tdSn.textContent = row.deviceSn;
+      tr.appendChild(tdSn);
+
+      const tdDevType = document.createElement('td');
+      tdDevType.textContent = row.deviceType;
+      tr.appendChild(tdDevType);
+
+      const tdReporter = document.createElement('td');
+      tdReporter.textContent = row.reporter;
+      tr.appendChild(tdReporter);
+
+      const tdCreate = document.createElement('td');
+      tdCreate.textContent = row.createTime;
+      tr.appendChild(tdCreate);
+
+      const tdPhoto = document.createElement('td');
+      tdPhoto.textContent = row.photoCount;
+      tr.appendChild(tdPhoto);
+
+      faultTableBody.appendChild(tr);
+    });
+
+    faultSummaryText.textContent = `共 ${total} 条记录`;
+    faultPageInfo.textContent = `${total === 0 ? 0 : faultCurrentPage} / ${Math.max(1, totalPages)}`;
+  }
+
+  // 故障工单筛选
+  function applyFaultFilter() {
+    const city = document.getElementById('filterFaultCity').value.trim();
+    const county = document.getElementById('filterFaultCounty').value.trim();
+    const source = document.getElementById('filterFaultSource').value.trim();
+    const type = document.getElementById('filterFaultType').value.trim();
+    const status = document.getElementById('filterFaultStatus').value.trim();
+    const faultNo = document.getElementById('filterFaultNo').value.trim();
+    const sn = document.getElementById('filterFaultSn').value.trim();
+    const reporter = document.getElementById('filterFaultReporter').value.trim();
+    const startDate = document.getElementById('filterFaultStartDate').value;
+    const endDate = document.getElementById('filterFaultEndDate').value;
+
+    faultCurrentFiltered = faultRows.filter(row => {
+      if (city && row.city.indexOf(city) === -1) return false;
+      if (county && row.county.indexOf(county) === -1) return false;
+      if (source && row.source !== source) return false;
+      if (type && row.faultType !== type) return false;
+      if (status && row.status !== status) return false;
+      if (faultNo && row.faultNo.indexOf(faultNo) === -1) return false;
+      if (sn && row.deviceSn.indexOf(sn) === -1) return false;
+      if (reporter && row.reporter.indexOf(reporter) === -1) return false;
+
+      if (startDate || endDate) {
+        const ts = new Date(row.createTime.replace(/-/g,'/')).getTime();
+        if (startDate) {
+          const s = new Date(startDate + ' 00:00:00').getTime();
+          if (ts < s) return false;
+        }
+        if (endDate) {
+          const e = new Date(endDate + ' 23:59:59').getTime();
+          if (ts > e) return false;
+        }
+      }
+
+      return true;
+    });
+
+    faultCurrentPage = 1;
+    renderFaultTable();
+  }
+
+  document.getElementById('btnFaultSearch').addEventListener('click', applyFaultFilter);
+
+  document.getElementById('btnFaultReset').addEventListener('click', () => {
+    [
+      'filterFaultCity',
+      'filterFaultCounty',
+      'filterFaultSource',
+      'filterFaultType',
+      'filterFaultStatus',
+      'filterFaultNo',
+      'filterFaultSn',
+      'filterFaultReporter',
+      'filterFaultStartDate',
+      'filterFaultEndDate'
+    ].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    faultCurrentFiltered = [...faultRows];
+    faultCurrentPage = 1;
+    renderFaultTable();
+  });
+
+  btnFaultPrev.addEventListener('click', () => {
+    if (faultCurrentPage > 1) {
+      faultCurrentPage--;
+      renderFaultTable();
+    }
+  });
+
+  btnFaultNext.addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(faultCurrentFiltered.length / faultPageSize));
+    if (faultCurrentPage < totalPages) {
+      faultCurrentPage++;
+      renderFaultTable();
+    }
+  });
+
+  // 故障工单导出
+  document.getElementById('btnFaultExport').addEventListener('click', () => {
+    if (!faultCurrentFiltered.length) {
+      alert('当前无可导出的故障终端记录。');
+      return;
+    }
+    const header = [
+      '故障工单编号','工单状态','故障来源','所属地市','所属区县',
+      '故障类型','故障等级','设备SN','终端类型','反馈人','创建时间','故障图片数'
+    ];
+    const lines = [header.join(',')];
+    faultCurrentFiltered.forEach(r => {
+      lines.push([
+        r.faultNo,
+        r.status,
+        r.source,
+        r.city,
+        r.county,
+        r.faultType,
+        r.faultLevel,
+        r.deviceSn,
+        r.deviceType,
+        `"${r.reporter.replace(/"/g,'""')}"`,
+        r.createTime,
+        r.photoCount
+      ].join(','));
+    });
+    const blob = new Blob([lines.join('\n')], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fault-terminal-export.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // 初始化故障终端列表
+  renderFaultTable();
 </script>
 </body>
 </html>
