@@ -438,7 +438,7 @@
     </header>
 
     <main>
-      <!-- 调拨出入库主流程 -->
+      <!-- 调拨出入库主流程（仅调拨内容） -->
       <section id="view-transfer" class="view active fade-in">
         <div class="card">
           <div class="step-indicator">
@@ -583,8 +583,8 @@
         </div>
       </section>
 
-    
-
+      <!-- 故障终端闭环管理视图（单独 section） -->
+      <section id="view-fault" class="view">
         <div class="card">
           <div class="card-header">
             <span>1. 故障工单基本信息</span>
@@ -631,7 +631,6 @@
             <span>2. 关联故障设备</span>
             <span style="font-size:11px;color:#2563eb;">扫码关联 · 终端信息回填</span>
           </div>
-     
 
           <div style="display:flex; gap:8px; margin-bottom:6px;">
             <button id="btnOpenFaultScanModal" class="btn btn-primary">📷 扫码关联设备</button>
@@ -719,43 +718,37 @@
         <div class="card">
           <div class="card-header">
             <span>4. 工单提交</span>
-
-                    
-
-        
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
             <button id="btnSaveFaultDraft" class="btn btn-primary">💾 保存/更新</button>
             <button id="btnClearFault" class="btn btn-outline">🗑 清空工单</button>
             <button id="btnSubmitFault" class="btn btn-danger">📨 提交生成故障工单</button>
           </div>
-      
 
           <div class="divider"></div>
           <div class="card-subtitle">最近创建的故障工单</div>
           <div id="faultList" style="font-size:11px;color:#9ca3af;">
             暂无故障工单，请先在上方创建并提交。
           </div>
-            <!-- 新增：故障工单流转记录 -->
+
           <div class="divider"></div>
           <div class="card-subtitle">故障工单流转记录</div>
           <div id="faultTimeline" class="timeline">
             <div class="timeline-item">系统初始化故障工单流程</div>
           </div>
-
         </div>
       </section>
 
-      <!-- 订单列表视图 -->
+      <!-- 订单列表视图：同时呈现调拨订单 + 故障工单 -->
       <section id="view-orders" class="view">
         <div class="card">
           <div class="card-header">
-            <span>调拨出入库订单列表</span>
+            <span>调拨出入库 & 故障终端订单列表</span>
             <span style="font-size:11px;color:#6b7280;">最近操作</span>
           </div>
           <div id="orderList">
             <div style="font-size:11px;color:#9ca3af;">
-              暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。
+              暂无历史订单，请先在“调拨出入库”或“故障终端”页创建订单/工单。
             </div>
           </div>
         </div>
@@ -806,7 +799,6 @@
           <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
             <button id="btnOpenCamera" class="btn btn-primary">📷 打开摄像头</button>
             <button id="btnStopCamera" class="btn btn-ghost-dark btn" disabled>■ 关闭摄像头</button>
-       
           </div>
 
           <div class="camera-summary">
@@ -927,7 +919,7 @@
       },
       orders: {
         title: '订单列表',
-        sub: '查询历史调拨出入库订单'
+        sub: '查询调拨订单与故障工单'
       },
       profile: {
         title: '我的',
@@ -1161,91 +1153,31 @@
       { code: "ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type: "二维码" }
     ];
 
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const btnOpenCamera = document.getElementById('btnOpenCamera');
+    const btnStopCamera = document.getElementById('btnStopCamera');
+    const codeTagsContainer = document.getElementById('codeTags');
 
+    const summaryCount = document.getElementById('summaryCount');
+    const summaryType = document.getElementById('summaryType');
+    const summaryTime = document.getElementById('summaryTime');
+    const summaryCurrentCode = document.getElementById('summaryCurrentCode');
+    const summaryCurrentType = document.getElementById('summaryCurrentType');
+    const summaryCurrentResult = document.getElementById('summaryCurrentResult');
 
-      const cameraVideo = document.getElementById('cameraVideo');
-const cameraStatus = document.getElementById('cameraStatus');
-const btnOpenCamera = document.getElementById('btnOpenCamera');
-const btnStopCamera = document.getElementById('btnStopCamera');
-const btnMockScan = document.getElementById('btnMockScan'); // 如果页面没这个按钮，也没关系
-const codeTagsContainer = document.getElementById('codeTags');
+    const infoCode = document.getElementById('infoCode');
+    const infoSN = document.getElementById('infoSN');
+    const infoDomain = document.getElementById('infoDomain');
+    const infoType = document.getElementById('infoType');
+    const infoStatus = document.getElementById('infoStatus');
+    const infoLocation = document.getElementById('infoLocation');
 
-const summaryCount = document.getElementById('summaryCount');
-const summaryType = document.getElementById('summaryType');
-const summaryTime = document.getElementById('summaryTime');
-const summaryCurrentCode = document.getElementById('summaryCurrentCode');
-const summaryCurrentType = document.getElementById('summaryCurrentType');
-const summaryCurrentResult = document.getElementById('summaryCurrentResult');
+    let currentStream = null;
+    let currentCode = null;
+    let currentSelectedItem = null;
 
-const infoCode = document.getElementById('infoCode');
-const infoSN = document.getElementById('infoSN');
-const infoDomain = document.getElementById('infoDomain');
-const infoType = document.getElementById('infoType');
-const infoStatus = document.getElementById('infoStatus');
-const infoLocation = document.getElementById('infoLocation');
-
-let currentStream = null;
-let currentCode = null;
-let currentSelectedItem = null;
-
-// 打开摄像头
-btnOpenCamera.addEventListener('click', async () => {
-  try {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
-      return;
-    }
-    currentStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
-      audio: false
-    });
-    cameraVideo.srcObject = currentStream;
-    cameraStatus.textContent = '摄像头已开启';
-    btnOpenCamera.disabled = true;
-    btnStopCamera.disabled = false;
-
-    // 打开摄像头 2 秒后自动出现一维码 + 二维码（模拟识别）
-    setTimeout(() => {
-      renderCodeTags(mockRecognizedCodes);
-      const first = mockRecognizedCodes[0];
-      if (first) {
-        const firstTag = document.querySelector('.code-tag[data-index="0"]');
-        if (firstTag) firstTag.classList.add('active');
-        onCodeSelected(first);
-      }
-    }, 2000);
-  } catch (e) {
-    console.error(e);
-    alert('摄像头开启失败：' + e.message);
-  }
-});
-
-// 关闭摄像头
-btnStopCamera.addEventListener('click', () => {
-  if (currentStream) {
-    currentStream.getTracks().forEach(t => t.stop());
-    currentStream = null;
-  }
-  cameraVideo.srcObject = null;
-  cameraStatus.textContent = '摄像头未开启';
-  btnOpenCamera.disabled = false;
-  btnStopCamera.disabled = true;
-});
-
-// （可选）模拟扫码按钮，仅当页面上真的有这个按钮时才生效
-if (btnMockScan) {
-  btnMockScan.addEventListener('click', () => {
-    renderCodeTags(mockRecognizedCodes);
-    const first = mockRecognizedCodes[0];
-    if (first) {
-      const firstTag = document.querySelector('.code-tag[data-index="0"]');
-      if (firstTag) firstTag.classList.add('active');
-      onCodeSelected(first);
-    }
-  });
-}
-
-
+    // 打开摄像头
     btnOpenCamera.addEventListener('click', async () => {
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -1261,7 +1193,7 @@ if (btnMockScan) {
         btnOpenCamera.disabled = true;
         btnStopCamera.disabled = false;
 
-        // 打开摄像头 2 秒后自动出现一维码 + 二维码
+        // 打开摄像头 2 秒后自动出现一维码 + 二维码（模拟识别）
         setTimeout(() => {
           renderCodeTags(mockRecognizedCodes);
           const first = mockRecognizedCodes[0];
@@ -1277,6 +1209,7 @@ if (btnMockScan) {
       }
     });
 
+    // 关闭摄像头
     btnStopCamera.addEventListener('click', () => {
       if (currentStream) {
         currentStream.getTracks().forEach(t => t.stop());
@@ -1294,7 +1227,6 @@ if (btnMockScan) {
         const span = document.createElement('span');
         span.style.fontSize = '10px';
         span.style.color = '#9ca3af';
-      
         codeTagsContainer.appendChild(span);
         summaryCount.textContent = '0';
         summaryType.textContent = '-';
@@ -1331,8 +1263,6 @@ if (btnMockScan) {
       summaryType.textContent = Array.from(typeSet).join(' / ');
       summaryTime.textContent = new Date().toLocaleString();
     }
-
- 
 
     function onCodeSelected(item) {
       currentCode = item.code;
@@ -1470,9 +1400,8 @@ if (btnMockScan) {
     const btnSaveFaultDraft     = document.getElementById('btnSaveFaultDraft');
     const btnClearFault         = document.getElementById('btnClearFault');
     const btnSubmitFault        = document.getElementById('btnSubmitFault');
-       const faultListEl           = document.getElementById('faultList');
-    const faultTimelineEl       = document.getElementById('faultTimeline'); // 新增
-
+    const faultListEl           = document.getElementById('faultList');
+    const faultTimelineEl       = document.getElementById('faultTimeline');
 
     let currentFaultTicket = null;
     let faultTickets = [];
@@ -1514,7 +1443,7 @@ if (btnMockScan) {
         faultTimelineEl.innerHTML = '<div class="timeline-item">系统初始化故障工单流程</div>';
       }
     }
-    // 新增：故障工单流转记录追加
+
     function appendFaultTimeline(text) {
       if (!faultTimelineEl) return;
       const item = document.createElement('div');
@@ -1525,8 +1454,6 @@ if (btnMockScan) {
       faultTimelineEl.scrollTop = faultTimelineEl.scrollHeight;
     }
 
-
-    
     function saveFaultDraft() {
       const city = faultCity.value.trim();
       const county = faultCounty.value.trim();
@@ -1548,7 +1475,7 @@ if (btnMockScan) {
           device: null,
           detail: {}
         };
-         appendFaultTimeline('创建故障工单草稿：' + faultNo);   // ★ 新增
+        appendFaultTimeline('创建故障工单草稿：' + faultNo);
       }
 
       currentFaultTicket.basic = {
@@ -1567,7 +1494,6 @@ if (btnMockScan) {
         photoCount: faultPhotos.files ? faultPhotos.files.length : 0
       };
 
-      // 设备信息
       if (faultDevSn.textContent !== '-' && faultDevSn.textContent.trim() !== '') {
         currentFaultTicket.device = {
           code: faultDevCode.textContent,
@@ -1582,9 +1508,10 @@ if (btnMockScan) {
       }
 
       setFaultStatus('草稿');
-      appendFaultTimeline('保存/更新故障工单草稿');           // ★ 新增
+      appendFaultTimeline('保存/更新故障工单草稿');
       alert('故障工单草稿已保存，可继续补充或修改后再提交。');
       renderFaultList();
+      renderOrderList();
     }
 
     function renderFaultList() {
@@ -1636,7 +1563,6 @@ if (btnMockScan) {
         div.appendChild(meta1);
         div.appendChild(meta2);
 
-        // 仅对草稿支持回填
         if (t.status === '草稿') {
           const tagRow = document.createElement('div');
           tagRow.style.marginTop = '4px';
@@ -1688,6 +1614,7 @@ if (btnMockScan) {
         }
         resetFaultForm();
         renderFaultList();
+        renderOrderList();
       }
     });
 
@@ -1699,12 +1626,13 @@ if (btnMockScan) {
       saveFaultDraft(); // 确保最新内容写入
       currentFaultTicket.status = '已提交';
       setFaultStatus('已提交');
-            appendFaultTimeline('提交生成故障工单：' + currentFaultTicket.faultNo); // ★ 新增
+      appendFaultTimeline('提交生成故障工单：' + currentFaultTicket.faultNo);
 
       faultTickets = faultTickets.filter(t => t.faultNo !== currentFaultTicket.faultNo);
       faultTickets.unshift({ ...currentFaultTicket });
       alert('故障工单已提交，后续可在后台进行派单处理与闭环跟踪。');
       renderFaultList();
+      renderOrderList();
     });
 
     btnClearFaultDevice.addEventListener('click', () => {
@@ -1768,7 +1696,6 @@ if (btnMockScan) {
         renderOrderList();
         scanModal.classList.remove('active');
       } else if (scanContext === 'fault') {
-        // 写入故障工单的关联设备信息
         faultDevCode.textContent = currentCode;
         faultDevSn.textContent = record.sn;
         faultDevType.textContent = record.type;
@@ -1857,7 +1784,7 @@ if (btnMockScan) {
       renderOrderList();
     });
 
-      // ============== 订单列表渲染（含调拨订单 + 故障工单） ==============
+    // ============== 订单列表渲染（含调拨订单 + 故障工单） ==============
     function renderOrderList() {
       orderListEl.innerHTML = '';
       const hasTransfer = orderHistory.length > 0;
@@ -1994,7 +1921,6 @@ if (btnMockScan) {
         item.appendChild(meta2);
         item.appendChild(tagRow);
 
-        // 回填到故障终端闭环管理页（仅草稿支持修改）
         item.addEventListener('click', () => {
           currentFaultTicket = { ...t };
           faultNoInput.value    = t.faultNo;
@@ -2022,7 +1948,6 @@ if (btnMockScan) {
             clearFaultDeviceView();
           }
 
-          // 切换到底部“故障终端”Tab
           document.querySelector('.tab-item[data-view="fault"]').click();
         });
 
