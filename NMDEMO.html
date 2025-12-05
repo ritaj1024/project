@@ -1178,70 +1178,88 @@
 
 
 
-        const cameraVideo = document.getElementById('cameraVideo');
-    const cameraStatus = document.getElementById('cameraStatus');
-    const btnOpenCamera = document.getElementById('btnOpenCamera');
-    const btnStopCamera = document.getElementById('btnStopCamera');
- const btnMockScan = document.getElementById('btnMockScan');
-    const codeTagsContainer = document.getElementById('codeTags');
+      const cameraVideo = document.getElementById('cameraVideo');
+const cameraStatus = document.getElementById('cameraStatus');
+const btnOpenCamera = document.getElementById('btnOpenCamera');
+const btnStopCamera = document.getElementById('btnStopCamera');
+const btnMockScan = document.getElementById('btnMockScan'); // 如果页面没这个按钮，也没关系
+const codeTagsContainer = document.getElementById('codeTags');
 
+const summaryCount = document.getElementById('summaryCount');
+const summaryType = document.getElementById('summaryType');
+const summaryTime = document.getElementById('summaryTime');
+const summaryCurrentCode = document.getElementById('summaryCurrentCode');
+const summaryCurrentType = document.getElementById('summaryCurrentType');
+const summaryCurrentResult = document.getElementById('summaryCurrentResult');
 
-    const summaryCount = document.getElementById('summaryCount');
-    const summaryType = document.getElementById('summaryType');
-    const summaryTime = document.getElementById('summaryTime');
-    const summaryCurrentCode = document.getElementById('summaryCurrentCode');
-    const summaryCurrentType = document.getElementById('summaryCurrentType');
-    const summaryCurrentResult = document.getElementById('summaryCurrentResult');
+const infoCode = document.getElementById('infoCode');
+const infoSN = document.getElementById('infoSN');
+const infoDomain = document.getElementById('infoDomain');
+const infoType = document.getElementById('infoType');
+const infoStatus = document.getElementById('infoStatus');
+const infoLocation = document.getElementById('infoLocation');
 
-    const infoCode = document.getElementById('infoCode');
-    const infoSN = document.getElementById('infoSN');
-    const infoDomain = document.getElementById('infoDomain');
-    const infoType = document.getElementById('infoType');
-    const infoStatus = document.getElementById('infoStatus');
-    const infoLocation = document.getElementById('infoLocation');
+let currentStream = null;
+let currentCode = null;
+let currentSelectedItem = null;
 
-    let currentStream = null;
-    let currentCode = null;
-    let currentSelectedItem = null;
-
-    btnOpenCamera.addEventListener('click', async () => {
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
-          return;
-        }
-        currentStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false
-        });
-        cameraVideo.srcObject = currentStream;
-        cameraStatus.textContent = '摄像头已开启';
-        btnOpenCamera.disabled = true;
-        btnStopCamera.disabled = false;
-
-        // 打开摄像头 2 秒后自动出现一维码 + 二维码
-        setTimeout(() => {
-          renderCodeTags(mockRecognizedCodes);
-          const first = mockRecognizedCodes[0];
-          if (first) {
-            const firstTag = document.querySelector('.code-tag[data-index="0"]');
-            if (firstTag) firstTag.classList.add('active');
-            onCodeSelected(first);
-          }
-        }, 2000);
-// 若后续你在页面上加了一个“模拟扫码”按钮（id=btnMockScan），才会生效
-const btnMockScan = document.getElementById('btnMockScan');
-    if (btnMockScan) {
-      btnMockScan.addEventListener('click', () => {
-        renderCodeTags(mockRecognizedCodes);
-        const first = mockRecognizedCodes[0];
-        if (first) {
-          const firstTag = document.querySelector('.code-tag[data-index="0"]');
-          if (firstTag) firstTag.classList.add('active');
-          onCodeSelected(first);
-        }
-      });
+// 打开摄像头
+btnOpenCamera.addEventListener('click', async () => {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
+      return;
     }
+    currentStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false
+    });
+    cameraVideo.srcObject = currentStream;
+    cameraStatus.textContent = '摄像头已开启';
+    btnOpenCamera.disabled = true;
+    btnStopCamera.disabled = false;
+
+    // 打开摄像头 2 秒后自动出现一维码 + 二维码（模拟识别）
+    setTimeout(() => {
+      renderCodeTags(mockRecognizedCodes);
+      const first = mockRecognizedCodes[0];
+      if (first) {
+        const firstTag = document.querySelector('.code-tag[data-index="0"]');
+        if (firstTag) firstTag.classList.add('active');
+        onCodeSelected(first);
+      }
+    }, 2000);
+  } catch (e) {
+    console.error(e);
+    alert('摄像头开启失败：' + e.message);
+  }
+});
+
+// 关闭摄像头
+btnStopCamera.addEventListener('click', () => {
+  if (currentStream) {
+    currentStream.getTracks().forEach(t => t.stop());
+    currentStream = null;
+  }
+  cameraVideo.srcObject = null;
+  cameraStatus.textContent = '摄像头未开启';
+  btnOpenCamera.disabled = false;
+  btnStopCamera.disabled = true;
+});
+
+// （可选）模拟扫码按钮，仅当页面上真的有这个按钮时才生效
+if (btnMockScan) {
+  btnMockScan.addEventListener('click', () => {
+    renderCodeTags(mockRecognizedCodes);
+    const first = mockRecognizedCodes[0];
+    if (first) {
+      const firstTag = document.querySelector('.code-tag[data-index="0"]');
+      if (firstTag) firstTag.classList.add('active');
+      onCodeSelected(first);
+    }
+  });
+}
+
 
     btnOpenCamera.addEventListener('click', async () => {
       try {
@@ -1329,15 +1347,7 @@ const btnMockScan = document.getElementById('btnMockScan');
       summaryTime.textContent = new Date().toLocaleString();
     }
 
-    btnMockScan.addEventListener('click', () => {
-      renderCodeTags(mockRecognizedCodes);
-      const first = mockRecognizedCodes[0];
-      if (first) {
-        const firstTag = document.querySelector('.code-tag[data-index="0"]');
-        if (firstTag) firstTag.classList.add('active');
-        onCodeSelected(first);
-      }
-    });
+ 
 
     function onCodeSelected(item) {
       currentCode = item.code;
