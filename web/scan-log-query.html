@@ -597,19 +597,20 @@
       bizType: '调拨入库',
       bizOrderNo: 'DBDD202412041530',
       sn: 'SKYWA8EFF0AD',
-      scanResult: '重复扫码',
-      matchResult: '已在本单申请单中',
-      description: '当前订单已存在该设备，系统阻止重复入库。',
+      scanResult: '成功',
+      matchResult: '已匹配台账',
+      description: '校验通过，加入调拨入库订单',
       operator: '李四 / 1008612',
       source: '装维APP',
-      opTime: '2024-12-04 13:14:09',
+      opTime: '2024-12-06 13:14:09',
       duration: 102,
       reqId: 'REQ-20241204-0001',
       raw: {
         request: { url: '/api/scan/dispatch-in', sn: 'SKYWA8EFF0AD', orderNo: 'DBDD202412041530' },
-        response: { code: 1002, msg: 'Duplicate SN for current order' }
+        response: {  code: 0, msg: 'OK', match: true  }
       }
     },
+    
     {
       id: 4,
       bizType: '调拨出库',
