@@ -536,6 +536,8 @@
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+
 </head>
 <body>
   <div class="phone-frame">
@@ -640,6 +642,12 @@
             点击【扫码添加】后弹出扫码界面，通过摄像头识别设备上的多个二维码、一维码，选择其中一个串码并加入本订单。
           </div>
 
+<!-- 扫码弹框内的摄像头预览区域 -->
+<div class="scan-preview">
+  <video id="scanVideo" autoplay muted playsinline style="width: 100%; border-radius: 12px; background:#000;"></video>
+</div>
+
+          
           <div style="display:flex; gap:8px; margin-top:4px;">
             <button id="btnOpenScanModal" class="btn btn-primary">📷 扫码添加</button>
             <span class="hint" style="align-self:center;">支持连续扫码多台设备，自动累计到设备清单。</span>
@@ -759,7 +767,7 @@
           <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
             <button id="btnOpenCamera" class="btn btn-primary">📷 打开摄像头</button>
             <button id="btnStopCamera" class="btn btn-ghost-dark btn" disabled>■ 关闭摄像头</button>
-            <button id="btnMockScan" class="btn btn-ghost-dark btn">✨ 模拟识别多个码</button>
+    
           </div>
 
           <div class="camera-summary">
