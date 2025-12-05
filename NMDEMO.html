@@ -1175,12 +1175,15 @@
       { code: "ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type: "二维码" }
     ];
 
-    const cameraVideo = document.getElementById('cameraVideo');
+
+
+        const cameraVideo = document.getElementById('cameraVideo');
     const cameraStatus = document.getElementById('cameraStatus');
     const btnOpenCamera = document.getElementById('btnOpenCamera');
     const btnStopCamera = document.getElementById('btnStopCamera');
-    const btnMockScan = document.getElementById('btnMockScan');
+-   const btnMockScan = document.getElementById('btnMockScan');
     const codeTagsContainer = document.getElementById('codeTags');
+
 
     const summaryCount = document.getElementById('summaryCount');
     const summaryType = document.getElementById('summaryType');
@@ -1199,6 +1202,45 @@
     let currentStream = null;
     let currentCode = null;
     let currentSelectedItem = null;
+
+    btnOpenCamera.addEventListener('click', async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
+          return;
+        }
+        currentStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false
+        });
+        cameraVideo.srcObject = currentStream;
+        cameraStatus.textContent = '摄像头已开启';
+        btnOpenCamera.disabled = true;
+        btnStopCamera.disabled = false;
+
+        // 打开摄像头 2 秒后自动出现一维码 + 二维码
+        setTimeout(() => {
+          renderCodeTags(mockRecognizedCodes);
+          const first = mockRecognizedCodes[0];
+          if (first) {
+            const firstTag = document.querySelector('.code-tag[data-index="0"]');
+            if (firstTag) firstTag.classList.add('active');
+            onCodeSelected(first);
+          }
+        }, 2000);
+// 若后续你在页面上加了一个“模拟扫码”按钮（id=btnMockScan），才会生效
+const btnMockScan = document.getElementById('btnMockScan');
+    if (btnMockScan) {
+      btnMockScan.addEventListener('click', () => {
+        renderCodeTags(mockRecognizedCodes);
+        const first = mockRecognizedCodes[0];
+        if (first) {
+          const firstTag = document.querySelector('.code-tag[data-index="0"]');
+          if (firstTag) firstTag.classList.add('active');
+          onCodeSelected(first);
+        }
+      });
+    }
 
     btnOpenCamera.addEventListener('click', async () => {
       try {
