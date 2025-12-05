@@ -1147,7 +1147,73 @@
           codeReader = new ZXing.BrowserMultiFormatReader();
         }
 
-        const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+    const codeReader = new ZXing.BrowserMultiFormatReader();
+let currentDeviceId = null;
+let controls = null;
+
+async function startScan() {
+  try {
+    // 1. 列出所有摄像头
+    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+    if (!devices || !devices.length) {
+      alert('没有检测到可用摄像头');
+      return;
+    }
+
+    // 2. 尝试优先选后置摄像头
+    const backCamera = devices.find(d =>
+      /back|rear|环境|后置/.test(d.label.toLowerCase())
+    );
+    currentDeviceId = (backCamera || devices[0]).deviceId;
+
+    cameraStatus.textContent = '摄像头已开启，识别中…';
+
+    // 3. 开始从指定摄像头解码
+    controls = await codeReader.decodeFromVideoDevice(
+      currentDeviceId,
+      'cameraVideo',
+      (result, err) => {
+        if (result) {
+          // 识别到码
+          handleZXingResult(result.text);  // 这里调用你原来处理串码的函数
+        }
+        // 没识别到会不断抛 NotFoundException，可以忽略
+        if (err && !(err instanceof ZXing.NotFoundException)) {
+          console.warn(err);
+        }
+      }
+    );
+
+    btnOpenCamera.disabled = true;
+    btnStopCamera.disabled = false;
+  } catch (e) {
+    console.error(e);
+    alert('摄像头开启/扫描失败：' + e.message);
+  }
+}
+
+function stopScan() {
+  try {
+    if (controls) {
+      controls.stop();   // 停止 ZXing 内部的循环
+      controls = null;
+    }
+    codeReader.reset();  // 重置解码器
+
+    const stream = cameraVideo.srcObject;
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+    }
+    cameraVideo.srcObject = null;
+
+    cameraStatus.textContent = '摄像头未开启';
+    btnOpenCamera.disabled = false;
+    btnStopCamera.disabled = true;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
         if (!devices || devices.length === 0) {
           alert('未找到可用摄像头。');
           return;
