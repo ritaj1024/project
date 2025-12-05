@@ -1,18 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
+  <!-- PWA 相关 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="AMS家客终端管理">
-
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0b74ff">
-<link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="AMS家客终端管理">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0b74ff">
+  <link rel="manifest" href="manifest.json">
 
   <title>AMS 家客终端管理 · 调拨出入库流程原型（扫码弹窗）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -536,9 +536,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
 
+  <!-- ZXing 扫码库 -->
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
+
 <body>
   <div class="phone-frame">
     <header>
@@ -632,7 +634,7 @@
           </div>
         </div>
 
-        <!-- 2. 扫码添加入口（弹出红框内容） -->
+        <!-- 2. 扫码添加入口 -->
         <div class="card">
           <div class="card-header">
             <span>扫码添加设备</span>
@@ -642,12 +644,6 @@
             点击【扫码添加】后弹出扫码界面，通过摄像头识别设备上的多个二维码、一维码，选择其中一个串码并加入本订单。
           </div>
 
-<!-- 扫码弹框内的摄像头预览区域 -->
-<div class="scan-preview">
-  <video id="scanVideo" autoplay muted playsinline style="width: 100%; border-radius: 12px; background:#000;"></video>
-</div>
-
-          
           <div style="display:flex; gap:8px; margin-top:4px;">
             <button id="btnOpenScanModal" class="btn btn-primary">📷 扫码添加</button>
             <span class="hint" style="align-self:center;">支持连续扫码多台设备，自动累计到设备清单。</span>
@@ -734,7 +730,7 @@
       </section>
     </main>
 
-    <!-- 扫码添加弹窗（红框框内容） -->
+    <!-- 扫码添加弹窗 -->
     <div id="scanModal" class="modal-backdrop">
       <div class="modal-panel">
         <div class="modal-header">
@@ -745,7 +741,6 @@
           <div id="btnCloseScanModal" class="modal-close">✕</div>
         </div>
 
-        <!-- 红框框主体：摄像头 + 多码识别 + 串码比对 + 加入订单 -->
         <div class="camera-box">
           <div class="camera-header-row">
             <span>后置摄像头 · 实时取景</span>
@@ -767,7 +762,6 @@
           <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
             <button id="btnOpenCamera" class="btn btn-primary">📷 打开摄像头</button>
             <button id="btnStopCamera" class="btn btn-ghost-dark btn" disabled>■ 关闭摄像头</button>
-    
           </div>
 
           <div class="camera-summary">
@@ -1092,29 +1086,23 @@
       setStepActive(2);
     });
 
-    btnCloseScanModal.addEventListener('click', () => {
+    function closeScanModal() {
       scanModal.classList.remove('active');
-    });
+      stopCameraAndScan();
+    }
 
+    btnCloseScanModal.addEventListener('click', closeScanModal);
     scanModal.addEventListener('click', (e) => {
       if (e.target === scanModal) {
-        scanModal.classList.remove('active');
+        closeScanModal();
       }
     });
 
-    // ============== 摄像头 & 多码识别 ==============
-    const mockRecognizedCodes = [
-      { code: "SN1234567890", type: "二维码" },
-      { code: "SN2233445566", type: "二维码" },
-      { code: "SN0000000000", type: "一维码" },
-      { code: "SN9988776655", type: "二维码" }
-    ];
-
+    // ============== 摄像头 & ZXing 多码识别 ==============
     const cameraVideo = document.getElementById('cameraVideo');
     const cameraStatus = document.getElementById('cameraStatus');
     const btnOpenCamera = document.getElementById('btnOpenCamera');
     const btnStopCamera = document.getElementById('btnStopCamera');
-    const btnMockScan = document.getElementById('btnMockScan');
     const codeTagsContainer = document.getElementById('codeTags');
 
     const summaryCount = document.getElementById('summaryCount');
@@ -1134,37 +1122,112 @@
     let currentStream = null;
     let currentCode = null;
     let currentSelectedItem = null;
+    let codeReader = null;
+    let recognizedCodes = [];
 
-    btnOpenCamera.addEventListener('click', async () => {
+    function getTypeLabel(format) {
+      try {
+        if (format === ZXing.BarcodeFormat.QR_CODE) return '二维码';
+        if (format === ZXing.BarcodeFormat.DATA_MATRIX) return '二维码';
+        // 其他一律视为一维码
+        return '一维码';
+      } catch (e) {
+        return '条码';
+      }
+    }
+
+    async function startCameraAndScan() {
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
           return;
         }
-        currentStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false
-        });
-        cameraVideo.srcObject = currentStream;
-        cameraStatus.textContent = '摄像头已开启';
+
+        if (!codeReader) {
+          codeReader = new ZXing.BrowserMultiFormatReader();
+        }
+
+        const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+        if (!devices || devices.length === 0) {
+          alert('未找到可用摄像头。');
+          return;
+        }
+
+        // 优先使用后置摄像头（通常是最后一个或第二个）
+        let deviceId = devices[0].deviceId;
+        if (devices.length > 1) {
+          deviceId = devices[devices.length - 1].deviceId;
+        }
+
+        stopCameraAndScan(); // 保险重置一次
+
+        recognizedCodes = [];
+        renderCodeTags(recognizedCodes);
+
+        cameraStatus.textContent = '摄像头已开启，请对准设备标签';
         btnOpenCamera.disabled = true;
         btnStopCamera.disabled = false;
+
+        codeReader.decodeFromVideoDevice(deviceId, cameraVideo, (result, err) => {
+          if (result) {
+            const text = (result.text || '').trim();
+            if (!text) return;
+
+            let format = result.barcodeFormat || (result.getBarcodeFormat ? result.getBarcodeFormat() : null);
+            const typeLabel = getTypeLabel(format);
+
+            // 去重
+            if (!recognizedCodes.some(c => c.code === text)) {
+              const item = { code: text, type: typeLabel };
+              recognizedCodes.push(item);
+              renderCodeTags(recognizedCodes);
+
+              // 自动选中最新识别的码
+              onCodeSelected(item);
+              setTimeout(() => {
+                document.querySelectorAll('.code-tag').forEach(tag => {
+                  if (tag.dataset.code === text) {
+                    tag.classList.add('active');
+                  } else {
+                    tag.classList.remove('active');
+                  }
+                });
+              }, 0);
+            }
+
+            const now = new Date();
+            summaryTime.textContent = now.toLocaleString();
+          }
+        });
+
       } catch (e) {
         console.error(e);
-        alert('摄像头开启失败：' + e.message);
+        alert('摄像头开启/扫描失败：' + e.message);
+        stopCameraAndScan();
       }
-    });
+    }
 
-    btnStopCamera.addEventListener('click', () => {
-      if (currentStream) {
-        currentStream.getTracks().forEach(t => t.stop());
-        currentStream = null;
+    function stopCameraAndScan() {
+      try {
+        if (codeReader) {
+          codeReader.reset();
+        }
+      } catch (e) {
+        console.warn(e);
       }
-      cameraVideo.srcObject = null;
+
+      if (cameraVideo && cameraVideo.srcObject) {
+        cameraVideo.srcObject.getTracks().forEach(t => t.stop());
+        cameraVideo.srcObject = null;
+      }
+      currentStream = null;
       cameraStatus.textContent = '摄像头未开启';
       btnOpenCamera.disabled = false;
       btnStopCamera.disabled = true;
-    });
+    }
+
+    btnOpenCamera.addEventListener('click', startCameraAndScan);
+    btnStopCamera.addEventListener('click', stopCameraAndScan);
 
     function renderCodeTags(codes) {
       codeTagsContainer.innerHTML = '';
@@ -1172,7 +1235,7 @@
         const span = document.createElement('span');
         span.style.fontSize = '10px';
         span.style.color = '#9ca3af';
-        span.textContent = '尚未识别到任何码，可点击“模拟识别多个码”查看多码识别与光标选项效果。';
+        span.textContent = '尚未识别到任何码，请点击“打开摄像头”并对准设备标签。';
         codeTagsContainer.appendChild(span);
         summaryCount.textContent = '0';
         summaryType.textContent = '-';
@@ -1186,6 +1249,7 @@
         const tag = document.createElement('div');
         tag.className = 'code-tag';
         tag.dataset.index = idx;
+        tag.dataset.code = item.code;
 
         const typeSpan = document.createElement('span');
         typeSpan.className = 'code-tag-type';
@@ -1208,27 +1272,12 @@
 
       summaryCount.textContent = codes.length.toString();
       summaryType.textContent = Array.from(typeSet).join(' / ');
-      const now = new Date();
-      summaryTime.textContent = now.toLocaleString();
     }
-
-    btnMockScan.addEventListener('click', () => {
-      renderCodeTags(mockRecognizedCodes);
-      const first = mockRecognizedCodes[0];
-      if (first) {
-        setTimeout(() => {
-          const firstTag = document.querySelector('.code-tag[data-index="0"]');
-          if (firstTag) {
-            firstTag.classList.add('active');
-            onCodeSelected(first);
-          }
-        }, 0);
-      }
-    });
 
     function onCodeSelected(item) {
       currentCode = item.code;
       currentSelectedItem = item;
+
       summaryCurrentCode.textContent = item.code;
       summaryCurrentType.textContent = item.type;
 
@@ -1242,19 +1291,17 @@
         infoLocation.textContent = record.location;
 
         summaryCurrentResult.textContent = '已找到系统终端台账记录';
-        summaryCurrentResult.className = '';
-        summaryCurrentResult.classList.add('good');
+        summaryCurrentResult.style.color = '#22c55e';
       } else {
         infoCode.textContent = item.code;
-        infoSN.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoDomain.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoType.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoStatus.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoLocation.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+        infoSN.textContent = '系统无记录';
+        infoDomain.textContent = '系统无记录';
+        infoType.textContent = '系统无记录';
+        infoStatus.textContent = '系统无记录';
+        infoLocation.textContent = '系统无记录';
 
         summaryCurrentResult.textContent = '未在系统台账中找到该串码';
-        summaryCurrentResult.className = '';
-        summaryCurrentResult.classList.add('bad');
+        summaryCurrentResult.style.color = '#f97316';
       }
     }
 
@@ -1362,8 +1409,8 @@
       }
       renderOrderList();
 
-      // 扫完一台后自动关闭弹窗，模拟真实“扫码添加完成”
       scanModal.classList.remove('active');
+      stopCameraAndScan();
     });
 
     btnGoApprove.addEventListener('click', () => {
