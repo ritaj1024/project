@@ -53,7 +53,6 @@
     .view { display: none; }
     .view.active { display: block; }
 
-    /* 通用卡片 */
     .card {
       background: #fff;
       border-radius: 14px;
@@ -81,22 +80,10 @@
       padding: 2px 8px;
       border-radius: 999px;
     }
-    .badge-draft {
-      background: #eef2ff;
-      color: #4f46e5;
-    }
-    .badge-pending {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .badge-pass {
-      background: #dcfce7;
-      color: #166534;
-    }
-    .badge-reject {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
+    .badge-draft { background:#eef2ff;color:#4f46e5; }
+    .badge-pending { background:#fef3c7;color:#92400e; }
+    .badge-pass { background:#dcfce7;color:#166534; }
+    .badge-reject { background:#fee2e2;color:#b91c1c; }
 
     .step-indicator {
       display: flex;
@@ -140,7 +127,6 @@
       background: #e5e7eb;
     }
 
-    /* 表单 */
     .form-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -148,16 +134,9 @@
       margin-bottom: 4px;
       font-size: 11px;
     }
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .form-label {
-      font-size: 11px;
-      color: #4b5563;
-    }
-    .form-label span.required { color: #ef4444; margin-left: 2px; }
+    .form-field { display:flex;flex-direction:column;gap:2px; }
+    .form-label { font-size:11px;color:#4b5563; }
+    .form-label span.required { color:#ef4444;margin-left:2px; }
     input[type="text"], select, textarea {
       border-radius: 10px;
       border: 1px solid #d1d5db;
@@ -189,37 +168,14 @@
       border-color: #1d4ed8;
       color: #fff;
     }
-    .btn-outline {
-      background: #fff;
-      border-color: #d1d5db;
-    }
-    .btn-danger {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #b91c1c;
-    }
-    .btn-ghost-dark {
-      background: transparent;
-      border-color: rgba(148,163,184,0.8);
-      color: #e5e7eb;
-    }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .btn-outline { background:#fff;border-color:#d1d5db; }
+    .btn-danger { background:#fee2e2;border-color:#fecaca;color:#b91c1c; }
+    .btn-ghost-dark { background:transparent;border-color:rgba(148,163,184,0.8);color:#e5e7eb; }
+    .btn:disabled { opacity:.6;cursor:not-allowed; }
 
-    .divider {
-      height: 1px;
-      background: #e5e7eb;
-      margin: 8px 0;
-    }
+    .divider { height:1px;background:#e5e7eb;margin:8px 0; }
+    .hint { font-size:10px;color:#6b7280; }
 
-    .hint {
-      font-size: 10px;
-      color: #6b7280;
-    }
-
-    /* 摄像头识别框（在弹窗里使用） */
     .camera-box {
       border-radius: 14px;
       background: #020617;
@@ -245,11 +201,7 @@
       height: 200px;
       background: radial-gradient(circle at top, #0f172a, #020617);
     }
-    video#cameraVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    video#cameraVideo { width:100%;height:100%;object-fit:cover; }
     .camera-overlay {
       pointer-events: none;
       position: absolute;
@@ -262,19 +214,14 @@
       height: 18px;
       border: 2px solid #38bdf8;
     }
-    .corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
-    .corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
-    .corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
-    .corner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
-    .scan-line {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      top: 50%;
-      height: 1px;
-      background: linear-gradient(to right, transparent, #22c55e, transparent);
-      box-shadow: 0 0 5px #22c55e;
-      opacity: 0.9;
+    .corner.tl{top:0;left:0;border-right:none;border-bottom:none;}
+    .corner.tr{top:0;right:0;border-left:none;border-bottom:none;}
+    .corner.bl{bottom:0;left:0;border-right:none;border-top:none;}
+    .corner.br{bottom:0;right:0;border-left:none;border-top:none;}
+    .scan-line{
+      position:absolute;left:10px;right:10px;top:50%;
+      height:1px;background:linear-gradient(to right,transparent,#22c55e,transparent);
+      box-shadow:0 0 5px #22c55e;opacity:.9;
     }
 
     .code-tags {
@@ -324,38 +271,35 @@
       border: 1px solid rgba(31, 41, 55, 0.9);
       color: #e5e7eb;
     }
-    .camera-summary-title {
-      font-size: 10px;
-      font-weight: 500;
-      margin-bottom: 3px;
-    }
-    .camera-summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2px;
-    }
-    .camera-summary-row span.key { color: #9ca3af; }
-    .camera-summary-row span.val { color: #f9fafb; }
+    .camera-summary-title { font-size:10px;font-weight:500;margin-bottom:3px; }
+    .camera-summary-row{display:flex;justify-content:space-between;margin-top:2px;}
+    .camera-summary-row span.key{color:#9ca3af;}
+    .camera-summary-row span.val{color:#f9fafb;}
 
-    /* 串码信息比对 + 设备清单 */
+    /* 串码信息比对区域样式优化 */
     .info-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 4px 10px;
       font-size: 11px;
       margin-top: 4px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
     }
     .info-item-label {
       color: #6b7280;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
     .info-item-value {
       font-weight: 500;
       color: #111827;
       min-height: 16px;
+      word-break: break-all;
     }
-    .info-item-value.bad { color: #b91c1c; }
-    .info-item-value.good { color: #15803d; }
+    .info-item-value.bad { color:#b91c1c; }
+    .info-item-value.good { color:#15803d; }
 
     .device-list {
       margin-top: 6px;
@@ -373,49 +317,30 @@
       border-bottom: 1px dashed #e5e7eb;
       align-items: center;
     }
-    .device-row:last-child { border-bottom: none; }
-    .device-meta {
-      max-width: 230px;
-    }
+    .device-row:last-child { border-bottom:none; }
+    .device-meta { max-width:230px; }
     .device-meta-line {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* 审批部分 */
-    .timeline {
-      margin-top: 6px;
-      font-size: 11px;
-      color: #4b5563;
-    }
+    .timeline { margin-top:6px;font-size:11px;color:#4b5563; }
     .timeline-item {
-      position: relative;
-      padding-left: 12px;
-      margin-bottom: 4px;
+      position:relative;
+      padding-left:12px;
+      margin-bottom:4px;
     }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: 3px;
-      top: 3px;
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: #2563eb;
+    .timeline-item::before{
+      content:"";position:absolute;left:3px;top:3px;
+      width:6px;height:6px;border-radius:999px;background:#2563eb;
     }
-    .timeline-item::after {
-      content: "";
-      position: absolute;
-      left: 5px;
-      top: 10px;
-      width: 1px;
-      height: 16px;
-      background: #e5e7eb;
+    .timeline-item::after{
+      content:"";position:absolute;left:5px;top:10px;
+      width:1px;height:16px;background:#e5e7eb;
     }
-    .timeline-item:last-child::after { display: none; }
+    .timeline-item:last-child::after{display:none;}
 
-    /* 订单列表 */
     .order-item {
       font-size: 11px;
       padding: 8px 8px;
@@ -430,15 +355,12 @@
       margin-bottom: 4px;
       align-items: center;
     }
-    .order-title {
-      font-size: 12px;
-      font-weight: 600;
-    }
+    .order-title { font-size:12px;font-weight:600; }
     .order-meta {
-      display: flex;
-      justify-content: space-between;
-      color: #6b7280;
-      margin-top: 2px;
+      display:flex;
+      justify-content:space-between;
+      color:#6b7280;
+      margin-top:2px;
     }
     .tag {
       font-size: 10px;
@@ -448,7 +370,6 @@
       color: #1d4ed8;
     }
 
-    /* 弹窗（扫码添加） */
     .modal-backdrop {
       position: absolute;
       inset: 0;
@@ -459,9 +380,7 @@
       padding: 18px;
       z-index: 30;
     }
-    .modal-backdrop.active {
-      display: flex;
-    }
+    .modal-backdrop.active { display:flex; }
     .modal-panel {
       width: 100%;
       max-width: 360px;
@@ -473,28 +392,15 @@
       padding: 10px 12px 12px;
     }
     .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:4px;
     }
-    .modal-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #111827;
-    }
-    .modal-subtitle {
-      font-size: 11px;
-      color: #6b7280;
-      margin-bottom: 6px;
-    }
-    .modal-close {
-      font-size: 20px;
-      cursor: pointer;
-      color: #6b7280;
-    }
+    .modal-title { font-size:14px;font-weight:600;color:#111827; }
+    .modal-subtitle { font-size:11px;color:#6b7280;margin-bottom:6px; }
+    .modal-close { font-size:20px;cursor:pointer;color:#6b7280; }
 
-    /* 底部 Tab */
     .tab-bar {
       height: 54px;
       border-top: 1px solid #e5e7eb;
@@ -502,29 +408,22 @@
       display: flex;
     }
     .tab-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: #6b7280;
-      cursor: pointer;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      color:#6b7280;
+      cursor:pointer;
     }
-    .tab-item span.icon {
-      font-size: 16px;
-      margin-bottom: 2px;
-    }
-    .tab-item.active {
-      color: #2563eb;
-    }
+    .tab-item span.icon{font-size:16px;margin-bottom:2px;}
+    .tab-item.active{color:#2563eb;}
 
-    .fade-in {
-      animation: fade-in 0.2s ease-out;
-    }
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+    .fade-in{animation:fade-in .2s ease-out;}
+    @keyframes fade-in{
+      from{opacity:0;transform:translateY(4px);}
+      to{opacity:1;transform:translateY(0);}
     }
   </style>
 </head>
@@ -541,7 +440,6 @@
     <main>
       <!-- 调拨出入库主流程 -->
       <section id="view-transfer" class="view active fade-in">
-        <!-- 步骤条 -->
         <div class="card">
           <div class="step-indicator">
             <div class="step-item active" data-step="1">
@@ -561,7 +459,7 @@
           </div>
         </div>
 
-        <!-- 1. 订单基本信息 -->
+        <!-- 基本信息 -->
         <div class="card">
           <div class="card-header">
             <span>订单基本信息</span>
@@ -588,11 +486,11 @@
           <div class="form-row">
             <div class="form-field">
               <label class="form-label">调出仓库<span class="required">*</span></label>
-              <input id="fieldFromStore" type="text" placeholder="如：成都·武侯中心仓" />
+              <input id="fieldFromStore" type="text" placeholder="如：内蒙古·呼和浩特市中心仓" />
             </div>
             <div class="form-field">
               <label class="form-label">调入仓库<span class="required">*</span></label>
-              <input id="fieldToStore" type="text" placeholder="如：成都·成华分局仓" />
+              <input id="fieldToStore" type="text" placeholder="如：内蒙古·包头市分局仓" />
             </div>
           </div>
 
@@ -621,7 +519,7 @@
           </div>
         </div>
 
-        <!-- 2. 扫码添加入口（弹出红框内容） -->
+        <!-- 扫码入口 -->
         <div class="card">
           <div class="card-header">
             <span>扫码添加设备</span>
@@ -637,7 +535,7 @@
           </div>
         </div>
 
-        <!-- 本订单设备清单 + 审批入口 -->
+        <!-- 设备清单 -->
         <div class="card">
           <div class="card-header">
             <span>本订单设备清单</span>
@@ -660,7 +558,7 @@
           </div>
         </div>
 
-        <!-- 3. 审批确认 -->
+        <!-- 审批 -->
         <div class="card">
           <div class="card-header">
             <span>审批与确认</span>
@@ -689,7 +587,7 @@
         </div>
       </section>
 
-      <!-- 订单列表视图 -->
+      <!-- 列表视图 -->
       <section id="view-orders" class="view">
         <div class="card">
           <div class="card-header">
@@ -704,7 +602,7 @@
         </div>
       </section>
 
-      <!-- 我的（占位） -->
+      <!-- 我的 -->
       <section id="view-profile" class="view">
         <div class="card">
           <div class="card-header">
@@ -717,7 +615,7 @@
       </section>
     </main>
 
-    <!-- 扫码添加弹窗（红框框内容） -->
+    <!-- 扫码弹窗 -->
     <div id="scanModal" class="modal-backdrop">
       <div class="modal-panel">
         <div class="modal-header">
@@ -728,7 +626,6 @@
           <div id="btnCloseScanModal" class="modal-close">✕</div>
         </div>
 
-        <!-- 红框框主体：摄像头 + 多码识别 + 串码比对 + 加入订单 -->
         <div class="camera-box">
           <div class="camera-header-row">
             <span>后置摄像头 · 实时取景</span>
@@ -793,6 +690,7 @@
 
         <div class="divider"></div>
 
+        <!-- 串码信息比对 -->
         <div class="info-grid">
           <div>
             <div class="info-item-label">设备识别码（串码）</div>
@@ -845,7 +743,7 @@
   </div>
 
   <script>
-    // ============== Tab 切换 ==============
+    // Tab 切换
     const tabItems = document.querySelectorAll('.tab-item');
     const views = {
       transfer: document.getElementById('view-transfer'),
@@ -856,33 +754,20 @@
     const headerSubTitle = document.getElementById('headerSubTitle');
 
     const headerTextMap = {
-      transfer: {
-        title: '调拨出入库',
-        sub: '订单创建 · 扫码添加 · 审批确认'
-      },
-      orders: {
-        title: '订单列表',
-        sub: '查询历史调拨出入库订单'
-      },
-      profile: {
-        title: '我的',
-        sub: '装维信息与调拨偏好'
-      }
+      transfer: { title:'调拨出入库', sub:'订单创建 · 扫码添加 · 审批确认' },
+      orders: { title:'订单列表', sub:'查询历史调拨出入库订单' },
+      profile:{ title:'我的', sub:'装维信息与调拨偏好' }
     };
 
-    tabItems.forEach(tab => {
-      tab.addEventListener('click', () => {
+    tabItems.forEach(tab=>{
+      tab.addEventListener('click',()=>{
         const viewKey = tab.getAttribute('data-view');
-
-        tabItems.forEach(t => t.classList.remove('active'));
+        tabItems.forEach(t=>t.classList.remove('active'));
         tab.classList.add('active');
 
-        Object.keys(views).forEach(key => {
-          if (key === viewKey) {
-            views[key].classList.add('active', 'fade-in');
-          } else {
-            views[key].classList.remove('active', 'fade-in');
-          }
+        Object.keys(views).forEach(key=>{
+          if(key===viewKey) views[key].classList.add('active','fade-in');
+          else views[key].classList.remove('active','fade-in');
         });
 
         headerTitle.textContent = headerTextMap[viewKey].title;
@@ -890,19 +775,14 @@
       });
     });
 
-    // ============== 步骤指示 ==============
-    function setStepActive(step) {
-      document.querySelectorAll('.step-item').forEach(el => {
-        const s = el.getAttribute('data-step');
-        if (Number(s) === step) {
-          el.classList.add('active');
-        } else {
-          el.classList.remove('active');
-        }
+    function setStepActive(step){
+      document.querySelectorAll('.step-item').forEach(el=>{
+        const s = Number(el.getAttribute('data-step'));
+        if(s===step) el.classList.add('active');
+        else el.classList.remove('active');
       });
     }
 
-    // ============== 订单状态 & 数据模型 ==============
     const orderStatusBadge = document.getElementById('orderStatusBadge');
     const approveStatusBadge = document.getElementById('approveStatusBadge');
     const deviceCountSpan = document.getElementById('deviceCount');
@@ -911,97 +791,88 @@
     const orderListEl = document.getElementById('orderList');
 
     const fieldOrderType = document.getElementById('fieldOrderType');
-    const fieldOrderNo = document.getElementById('fieldOrderNo');
+    const fieldOrderNo   = document.getElementById('fieldOrderNo');
     const fieldFromStore = document.getElementById('fieldFromStore');
-    const fieldToStore = document.getElementById('fieldToStore');
-    const fieldCreator = document.getElementById('fieldCreator');
-    const fieldPhone = document.getElementById('fieldPhone');
-    const fieldRemark = document.getElementById('fieldRemark');
+    const fieldToStore   = document.getElementById('fieldToStore');
+    const fieldCreator   = document.getElementById('fieldCreator');
+    const fieldPhone     = document.getElementById('fieldPhone');
+    const fieldRemark    = document.getElementById('fieldRemark');
 
-    const btnSaveBasic = document.getElementById('btnSaveBasic');
-    const btnResetBasic = document.getElementById('btnResetBasic');
-    const btnGoApprove = document.getElementById('btnGoApprove');
+    const btnSaveBasic   = document.getElementById('btnSaveBasic');
+    const btnResetBasic  = document.getElementById('btnResetBasic');
+    const btnGoApprove   = document.getElementById('btnGoApprove');
     const btnSubmitApprove = document.getElementById('btnSubmitApprove');
-    const btnApprovePass = document.getElementById('btnApprovePass');
+    const btnApprovePass   = document.getElementById('btnApprovePass');
     const btnApproveReject = document.getElementById('btnApproveReject');
 
     let currentOrder = null;
     let orderHistory = [];
 
-    function generateOrderNo() {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      const t = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
-      return 'DBDD' + y + m + d + t;
+    function generateOrderNo(){
+      const now=new Date();
+      const y=now.getFullYear();
+      const m=String(now.getMonth()+1).padStart(2,'0');
+      const d=String(now.getDate()).padStart(2,'0');
+      const t=String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+      return 'DBDD'+y+m+d+t;
     }
 
-    function setOrderStatus(status) {
-      orderStatusBadge.textContent = status;
-      approveStatusBadge.textContent = status;
-      orderStatusBadge.className = 'badge-status';
-      approveStatusBadge.className = 'badge-status';
-      if (status === '草稿') {
-        orderStatusBadge.classList.add('badge-draft');
-        approveStatusBadge.classList.add('badge-draft');
-      } else if (status === '待审批') {
-        orderStatusBadge.classList.add('badge-pending');
-        approveStatusBadge.classList.add('badge-pending');
-      } else if (status === '已通过') {
-        orderStatusBadge.classList.add('badge-pass');
-        approveStatusBadge.classList.add('badge-pass');
-      } else if (status === '已驳回') {
-        orderStatusBadge.classList.add('badge-reject');
-        approveStatusBadge.classList.add('badge-reject');
-      }
+    function setOrderStatus(status){
+      orderStatusBadge.textContent=status;
+      approveStatusBadge.textContent=status;
+      orderStatusBadge.className='badge-status';
+      approveStatusBadge.className='badge-status';
+      if(status==='草稿'){orderStatusBadge.classList.add('badge-draft');approveStatusBadge.classList.add('badge-draft');}
+      else if(status==='待审批'){orderStatusBadge.classList.add('badge-pending');approveStatusBadge.classList.add('badge-pending');}
+      else if(status==='已通过'){orderStatusBadge.classList.add('badge-pass');approveStatusBadge.classList.add('badge-pass');}
+      else if(status==='已驳回'){orderStatusBadge.classList.add('badge-reject');approveStatusBadge.classList.add('badge-reject');}
     }
 
-    function appendTimeline(text) {
-      const item = document.createElement('div');
-      item.className = 'timeline-item';
-      const nowStr = new Date().toLocaleString();
-      item.textContent = nowStr + ' - ' + text;
+    function appendTimeline(text){
+      const item=document.createElement('div');
+      item.className='timeline-item';
+      const nowStr=new Date().toLocaleString();
+      item.textContent=nowStr+' - '+text;
       timelineEl.appendChild(item);
-      timelineEl.scrollTop = timelineEl.scrollHeight;
+      timelineEl.scrollTop=timelineEl.scrollHeight;
     }
 
-    function saveBasicInfo() {
-      const orderType = fieldOrderType.value;
-      const fromStore = fieldFromStore.value.trim();
-      const toStore = fieldToStore.value.trim();
-      const creator = fieldCreator.value.trim();
-      const phone = fieldPhone.value.trim();
-      const remark = fieldRemark.value.trim();
+    function saveBasicInfo(){
+      const orderType=fieldOrderType.value;
+      const fromStore=fieldFromStore.value.trim();
+      const toStore  =fieldToStore.value.trim();
+      const creator  =fieldCreator.value.trim();
+      const phone    =fieldPhone.value.trim();
+      const remark   =fieldRemark.value.trim();
 
-      if (!fromStore || !toStore || !creator) {
+      if(!fromStore||!toStore||!creator){
         alert('调出仓库、调入仓库、创建人/工号为必填项。');
         return;
       }
 
-      if (!currentOrder) {
-        const orderNo = generateOrderNo();
-        fieldOrderNo.value = orderNo;
-        currentOrder = {
+      if(!currentOrder){
+        const orderNo=generateOrderNo();
+        fieldOrderNo.value=orderNo;
+        currentOrder={
           orderNo,
-          type: orderType,
+          type:orderType,
           fromStore,
           toStore,
           creator,
           phone,
           remark,
-          devices: [],
-          status: '草稿',
-          createdAt: new Date().toISOString()
+          devices:[],
+          status:'草稿',
+          createdAt:new Date().toISOString()
         };
-        appendTimeline('创建订单草稿：' + orderNo);
-      } else {
-        currentOrder.type = orderType;
-        currentOrder.fromStore = fromStore;
-        currentOrder.toStore = toStore;
-        currentOrder.creator = creator;
-        currentOrder.phone = phone;
-        currentOrder.remark = remark;
+        appendTimeline('创建订单草稿：'+orderNo);
+      }else{
+        currentOrder.type=orderType;
+        currentOrder.fromStore=fromStore;
+        currentOrder.toStore=toStore;
+        currentOrder.creator=creator;
+        currentOrder.phone=phone;
+        currentOrder.remark=remark;
         appendTimeline('更新订单基本信息');
       }
 
@@ -1009,65 +880,57 @@
       setStepActive(2);
       alert('订单基本信息已保存，可以点击【扫码添加】录入设备。');
 
-      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
-      if (idx === -1) {
-        orderHistory.unshift({ ...currentOrder });
-      } else {
-        orderHistory[idx] = { ...currentOrder };
-      }
+      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
+      if(idx===-1) orderHistory.unshift({...currentOrder});
+      else orderHistory[idx]={...currentOrder};
       renderOrderList();
     }
 
-    function resetBasicInfo() {
-      fieldOrderType.value = '调拨出库';
-      fieldOrderNo.value = '';
-      fieldFromStore.value = '';
-      fieldToStore.value = '';
-      fieldCreator.value = '张三 / 1008611';
-      fieldPhone.value = '';
-      fieldRemark.value = '';
-      currentOrder = null;
+    function resetBasicInfo(){
+      fieldOrderType.value='调拨出库';
+      fieldOrderNo.value='';
+      fieldFromStore.value='';
+      fieldToStore.value='';
+      fieldCreator.value='张三 / 1008611';
+      fieldPhone.value='';
+      fieldRemark.value='';
+      currentOrder=null;
       setOrderStatus('草稿');
       setStepActive(1);
-      timelineEl.innerHTML = '<div class="timeline-item">系统初始化订单流程（草稿）</div>';
+      timelineEl.innerHTML='<div class="timeline-item">系统初始化订单流程（草稿）</div>';
       renderDeviceList();
     }
 
-    btnSaveBasic.addEventListener('click', saveBasicInfo);
-    btnResetBasic.addEventListener('click', resetBasicInfo);
+    btnSaveBasic.addEventListener('click',saveBasicInfo);
+    btnResetBasic.addEventListener('click',resetBasicInfo);
 
-    // ============== 模拟终端台账数据 ==============
+    // 终端台账（演示：内蒙数据）
+    const innerMongoliaRecord = {
+      sn: 'SKYWA8EFF0AD',
+      domain: '内蒙古自治区·呼和浩特市新城区',
+      type: '光猫-家庭网关',
+      status: '在库',
+      location: '内蒙古·呼和浩特市新城区管理域仓库'
+    };
+
+    // 其他示例台账（保留）
     const terminalCatalog = {
       "SN1234567890": {
         sn: "SN1234567890",
-        domain: "家客宽带管理域",
+        domain: "内蒙古自治区·包头市昆都仑区",
         type: "光猫",
         status: "在库",
-        location: "成都 · 武侯区中心仓"
-      },
-      "SN2233445566": {
-        sn: "SN2233445566",
-        domain: "政企业务管理域",
-        type: "企业网关",
-        status: "在库",
-        location: "成都 · 高新区政企仓"
-      },
-      "SN9988776655": {
-        sn: "SN9988776655",
-        domain: "家客宽带管理域",
-        type: "机顶盒",
-        status: "已装机",
-        location: "用户现场 · 成都市成华区"
+        location: "内蒙古·包头市昆都仑区中心仓"
       }
     };
 
-    // ============== 扫码弹窗开关 ==============
-    const scanModal = document.getElementById('scanModal');
-    const btnOpenScanModal = document.getElementById('btnOpenScanModal');
-    const btnCloseScanModal = document.getElementById('btnCloseScanModal');
+    // 扫码弹窗开关
+    const scanModal=document.getElementById('scanModal');
+    const btnOpenScanModal=document.getElementById('btnOpenScanModal');
+    const btnCloseScanModal=document.getElementById('btnCloseScanModal');
 
-    btnOpenScanModal.addEventListener('click', () => {
-      if (!currentOrder) {
+    btnOpenScanModal.addEventListener('click',()=>{
+      if(!currentOrder){
         alert('请先保存订单基本信息，再进行扫码。');
         return;
       }
@@ -1075,124 +938,118 @@
       setStepActive(2);
     });
 
-    btnCloseScanModal.addEventListener('click', () => {
+    btnCloseScanModal.addEventListener('click',()=>{
       scanModal.classList.remove('active');
     });
-
-    scanModal.addEventListener('click', (e) => {
-      if (e.target === scanModal) {
-        scanModal.classList.remove('active');
-      }
+    scanModal.addEventListener('click',e=>{
+      if(e.target===scanModal) scanModal.classList.remove('active');
     });
 
-    // ============== 摄像头 & 多码识别（示例） ==============
-    const mockRecognizedCodes = [
-      { code: "SKYWA8EFF0AD", type: "一维码" },
-      { code: "ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type: "二维码" }
+    // 摄像头 & 多码识别（固定一维码 + 二维码）
+    const mockRecognizedCodes=[
+      { code:"SKYWA8EFF0AD", type:"一维码" },
+      { code:"ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type:"二维码" }
     ];
 
-    const cameraVideo = document.getElementById('cameraVideo');
-    const cameraStatus = document.getElementById('cameraStatus');
-    const btnOpenCamera = document.getElementById('btnOpenCamera');
-    const btnStopCamera = document.getElementById('btnStopCamera');
-    const btnMockScan = document.getElementById('btnMockScan');
-    const codeTagsContainer = document.getElementById('codeTags');
+    const cameraVideo=document.getElementById('cameraVideo');
+    const cameraStatus=document.getElementById('cameraStatus');
+    const btnOpenCamera=document.getElementById('btnOpenCamera');
+    const btnStopCamera=document.getElementById('btnStopCamera');
+    const btnMockScan=document.getElementById('btnMockScan');
+    const codeTagsContainer=document.getElementById('codeTags');
 
-    const summaryCount = document.getElementById('summaryCount');
-    const summaryType = document.getElementById('summaryType');
-    const summaryTime = document.getElementById('summaryTime');
-    const summaryCurrentCode = document.getElementById('summaryCurrentCode');
-    const summaryCurrentType = document.getElementById('summaryCurrentType');
-    const summaryCurrentResult = document.getElementById('summaryCurrentResult');
+    const summaryCount=document.getElementById('summaryCount');
+    const summaryType=document.getElementById('summaryType');
+    const summaryTime=document.getElementById('summaryTime');
+    const summaryCurrentCode=document.getElementById('summaryCurrentCode');
+    const summaryCurrentType=document.getElementById('summaryCurrentType');
+    const summaryCurrentResult=document.getElementById('summaryCurrentResult');
 
-    const infoCode = document.getElementById('infoCode');
-    const infoSN = document.getElementById('infoSN');
-    const infoDomain = document.getElementById('infoDomain');
-    const infoType = document.getElementById('infoType');
-    const infoStatus = document.getElementById('infoStatus');
-    const infoLocation = document.getElementById('infoLocation');
+    const infoCode=document.getElementById('infoCode');
+    const infoSN=document.getElementById('infoSN');
+    const infoDomain=document.getElementById('infoDomain');
+    const infoType=document.getElementById('infoType');
+    const infoStatus=document.getElementById('infoStatus');
+    const infoLocation=document.getElementById('infoLocation');
 
-    let currentStream = null;
-    let currentCode = null;
-    let currentSelectedItem = null;
+    let currentStream=null;
+    let currentCode=null;
+    let currentSelectedItem=null;
 
-    btnOpenCamera.addEventListener('click', async () => {
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    btnOpenCamera.addEventListener('click',async()=>{
+      try{
+        if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
           alert('当前浏览器不支持摄像头调用，请在安卓手机浏览器或 HTTPS 环境下访问。');
           return;
         }
-        currentStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false
+        currentStream=await navigator.mediaDevices.getUserMedia({
+          video:{ facingMode:"environment" },
+          audio:false
         });
-        cameraVideo.srcObject = currentStream;
-        cameraStatus.textContent = '摄像头已开启';
-        btnOpenCamera.disabled = true;
-        btnStopCamera.disabled = false;
+        cameraVideo.srcObject=currentStream;
+        cameraStatus.textContent='摄像头已开启';
+        btnOpenCamera.disabled=true;
+        btnStopCamera.disabled=false;
 
-        // 打开摄像头后 2 秒 自动识别一维码 + 二维码
-        setTimeout(() => {
+        // 打开摄像头 2 秒后自动出现一维码 + 二维码
+        setTimeout(()=>{
           renderCodeTags(mockRecognizedCodes);
-          const first = mockRecognizedCodes[0];
-          if (first) {
-            const firstTag = document.querySelector('.code-tag[data-index="0"]');
-            if (firstTag) {
-              firstTag.classList.add('active');
-            }
+          const first=mockRecognizedCodes[0];
+          if(first){
+            const firstTag=document.querySelector('.code-tag[data-index="0"]');
+            if(firstTag) firstTag.classList.add('active');
             onCodeSelected(first);
           }
-        }, 2000);
-      } catch (e) {
+        },2000);
+      }catch(e){
         console.error(e);
-        alert('摄像头开启失败：' + e.message);
+        alert('摄像头开启失败：'+e.message);
       }
     });
 
-    btnStopCamera.addEventListener('click', () => {
-      if (currentStream) {
-        currentStream.getTracks().forEach(t => t.stop());
-        currentStream = null;
+    btnStopCamera.addEventListener('click',()=>{
+      if(currentStream){
+        currentStream.getTracks().forEach(t=>t.stop());
+        currentStream=null;
       }
-      cameraVideo.srcObject = null;
-      cameraStatus.textContent = '摄像头未开启';
-      btnOpenCamera.disabled = false;
-      btnStopCamera.disabled = true;
+      cameraVideo.srcObject=null;
+      cameraStatus.textContent='摄像头未开启';
+      btnOpenCamera.disabled=false;
+      btnStopCamera.disabled=true;
     });
 
-    function renderCodeTags(codes) {
-      codeTagsContainer.innerHTML = '';
-      if (!codes || codes.length === 0) {
-        const span = document.createElement('span');
-        span.style.fontSize = '10px';
-        span.style.color = '#9ca3af';
-        span.textContent = '尚未识别到任何码，可点击“多码识别示例”查看多码识别与光标选项效果。';
+    function renderCodeTags(codes){
+      codeTagsContainer.innerHTML='';
+      if(!codes||!codes.length){
+        const span=document.createElement('span');
+        span.style.fontSize='10px';
+        span.style.color='#9ca3af';
+        span.textContent='尚未识别到任何码，可点击“多码识别示例”查看多码识别与光标选项效果。';
         codeTagsContainer.appendChild(span);
-        summaryCount.textContent = '0';
-        summaryType.textContent = '-';
-        summaryTime.textContent = '-';
+        summaryCount.textContent='0';
+        summaryType.textContent='-';
+        summaryTime.textContent='-';
         return;
       }
-
-      let typeSet = new Set();
-      codes.forEach((item, idx) => {
+      let typeSet=new Set();
+      codes.forEach((item,idx)=>{
         typeSet.add(item.type);
-        const tag = document.createElement('div');
-        tag.className = 'code-tag';
-        tag.dataset.index = idx;
+        const tag=document.createElement('div');
+        tag.className='code-tag';
+        tag.dataset.index=idx;
 
-        const typeSpan = document.createElement('span');
-        typeSpan.className = 'code-tag-type';
-        typeSpan.textContent = item.type;
+        const typeSpan=document.createElement('span');
+        typeSpan.className='code-tag-type';
+        typeSpan.textContent=item.type;
 
-        const textSpan = document.createElement('span');
-        textSpan.textContent = item.code;
+        const textSpan=document.createElement('span');
+        textSpan.textContent=item.code;
 
         tag.appendChild(typeSpan);
         tag.appendChild(textSpan);
 
-        tag.addEventListener('click', () => {
-          document.querySelectorAll('.code-tag').forEach(el => el.classList.remove('active'));
+        tag.addEventListener('click',()=>{
+          document.querySelectorAll('.code-tag').forEach(el=>el.classList.remove('active'));
           tag.classList.add('active');
           onCodeSelected(item);
         });
@@ -1200,108 +1057,121 @@
         codeTagsContainer.appendChild(tag);
       });
 
-      summaryCount.textContent = codes.length.toString();
-      summaryType.textContent = Array.from(typeSet).join(' / ');
-      const now = new Date();
-      summaryTime.textContent = now.toLocaleString();
+      summaryCount.textContent=String(codes.length);
+      summaryType.textContent=Array.from(typeSet).join(' / ');
+      summaryTime.textContent=new Date().toLocaleString();
     }
 
-    // 备用：点击“多码识别示例”按钮手动触发
-    btnMockScan.addEventListener('click', () => {
+    // 手动示例按钮
+    btnMockScan.addEventListener('click',()=>{
       renderCodeTags(mockRecognizedCodes);
-      const first = mockRecognizedCodes[0];
-      if (first) {
-        const firstTag = document.querySelector('.code-tag[data-index="0"]');
-        if (firstTag) {
-          firstTag.classList.add('active');
-        }
+      const first=mockRecognizedCodes[0];
+      if(first){
+        const firstTag=document.querySelector('.code-tag[data-index="0"]');
+        if(firstTag) firstTag.classList.add('active');
         onCodeSelected(first);
       }
     });
 
-    function onCodeSelected(item) {
-      currentCode = item.code;
-      currentSelectedItem = item;
-      summaryCurrentCode.textContent = item.code;
-      summaryCurrentType.textContent = item.type;
+    function onCodeSelected(item){
+      currentCode=item.code;
+      currentSelectedItem=item;
+      summaryCurrentCode.textContent=item.code;
+      summaryCurrentType.textContent=item.type;
 
-      const record = terminalCatalog[item.code];
-      if (record) {
-        infoCode.textContent = item.code;
-        infoSN.textContent = record.sn;
-        infoDomain.textContent = record.domain;
-        infoType.textContent = record.type;
-        infoStatus.textContent = record.status;
-        infoLocation.textContent = record.location;
+      // 逻辑：若是一维码 SKYWA8EFF0AD 或 二维码中包含 sn=SKYWA8EFF0AD，则按内蒙台账展示
+      let record=null;
+      if(item.code==='SKYWA8EFF0AD' || item.code.indexOf('sn=SKYWA8EFF0AD')>-1){
+        record=innerMongoliaRecord;
+      }else if(terminalCatalog[item.code]){
+        record=terminalCatalog[item.code];
+      }
 
-        summaryCurrentResult.textContent = '已找到系统终端台账记录';
-        summaryCurrentResult.className = '';
-        summaryCurrentResult.classList.add('good');
-      } else {
-        infoCode.textContent = item.code;
-        infoSN.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoDomain.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoType.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoStatus.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
-        infoLocation.innerHTML = '<span class="info-item-value bad">系统无记录</span>';
+      if(record){
+        infoCode.textContent=item.code;
+        infoSN.textContent=record.sn;
+        infoDomain.textContent=record.domain;
+        infoType.textContent=record.type;
+        infoStatus.textContent=record.status;
+        infoLocation.textContent=record.location;
 
-        summaryCurrentResult.textContent = '未在系统台账中找到该串码';
-        summaryCurrentResult.className = '';
-        summaryCurrentResult.classList.add('bad');
+        infoSN.className='info-item-value good';
+        infoDomain.className='info-item-value good';
+        infoType.className='info-item-value good';
+        infoStatus.className='info-item-value good';
+        infoLocation.className='info-item-value good';
+
+        summaryCurrentResult.textContent='已找到系统终端台账记录';
+        summaryCurrentResult.className='good';
+      }else{
+        infoCode.textContent=item.code;
+        infoSN.textContent='系统无记录';
+        infoDomain.textContent='系统无记录';
+        infoType.textContent='系统无记录';
+        infoStatus.textContent='系统无记录';
+        infoLocation.textContent='系统无记录';
+
+        infoSN.className='info-item-value bad';
+        infoDomain.className='info-item-value bad';
+        infoType.className='info-item-value bad';
+        infoStatus.className='info-item-value bad';
+        infoLocation.className='info-item-value bad';
+
+        summaryCurrentResult.textContent='未在系统台账中找到该串码';
+        summaryCurrentResult.className='bad';
       }
     }
 
-    // ============== 设备清单操作 ==============
-    const btnAddDevice = document.getElementById('btnAddDevice');
+    const btnAddDevice=document.getElementById('btnAddDevice');
 
-    function renderDeviceList() {
-      deviceListContainer.innerHTML = '';
-      if (!currentOrder || !currentOrder.devices.length) {
-        const div = document.createElement('div');
-        div.style.fontSize = '11px';
-        div.style.color = '#9ca3af';
-        div.style.padding = '8px 8px';
-        div.textContent = '暂无设备，请先点击上方【扫码添加】录入设备。';
+    function renderDeviceList(){
+      deviceListContainer.innerHTML='';
+      if(!currentOrder || !currentOrder.devices.length){
+        const div=document.createElement('div');
+        div.style.fontSize='11px';
+        div.style.color='#9ca3af';
+        div.style.padding='8px 8px';
+        div.textContent='暂无设备，请先点击上方【扫码添加】录入设备。';
         deviceListContainer.appendChild(div);
-        deviceCountSpan.textContent = '0';
+        deviceCountSpan.textContent='0';
         return;
       }
-      deviceCountSpan.textContent = currentOrder.devices.length.toString();
+      deviceCountSpan.textContent=String(currentOrder.devices.length);
 
-      currentOrder.devices.forEach((dev, index) => {
-        const row = document.createElement('div');
-        row.className = 'device-row';
+      currentOrder.devices.forEach((dev,index)=>{
+        const row=document.createElement('div');
+        row.className='device-row';
 
-        const meta = document.createElement('div');
-        meta.className = 'device-meta';
+        const meta=document.createElement('div');
+        meta.className='device-meta';
 
-        const line1 = document.createElement('div');
-        line1.className = 'device-meta-line';
-        line1.textContent = dev.code + ' | ' + dev.type;
+        const line1=document.createElement('div');
+        line1.className='device-meta-line';
+        line1.textContent=dev.code+' | '+dev.type;
 
-        const line2 = document.createElement('div');
-        line2.className = 'device-meta-line';
-        line2.style.fontSize = '10px';
-        line2.style.color = '#6b7280';
-        line2.textContent = dev.domain + ' · ' + dev.status;
+        const line2=document.createElement('div');
+        line2.className='device-meta-line';
+        line2.style.fontSize='10px';
+        line2.style.color='#6b7280';
+        line2.textContent=dev.domain+' · '+dev.status;
 
-        const line3 = document.createElement('div');
-        line3.className = 'device-meta-line';
-        line3.style.fontSize = '10px';
-        line3.style.color = '#9ca3af';
-        line3.textContent = dev.location;
+        const line3=document.createElement('div');
+        line3.className='device-meta-line';
+        line3.style.fontSize='10px';
+        line3.style.color='#9ca3af';
+        line3.textContent=dev.location;
 
         meta.appendChild(line1);
         meta.appendChild(line2);
         meta.appendChild(line3);
 
-        const actionBtn = document.createElement('button');
-        actionBtn.className = 'btn btn-outline';
-        actionBtn.style.fontSize = '10px';
-        actionBtn.textContent = '移除';
-        actionBtn.addEventListener('click', () => {
-          currentOrder.devices.splice(index, 1);
-          appendTimeline('移除设备：' + dev.code);
+        const actionBtn=document.createElement('button');
+        actionBtn.className='btn btn-outline';
+        actionBtn.style.fontSize='10px';
+        actionBtn.textContent='移除';
+        actionBtn.addEventListener('click',()=>{
+          currentOrder.devices.splice(index,1);
+          appendTimeline('移除设备：'+dev.code);
           renderDeviceList();
         });
 
@@ -1311,26 +1181,28 @@
       });
     }
 
-    btnAddDevice.addEventListener('click', () => {
-      if (!currentOrder) {
+    btnAddDevice.addEventListener('click',()=>{
+      if(!currentOrder){
         alert('请先保存订单基本信息。');
         return;
       }
-      if (!currentCode || !currentSelectedItem) {
+      if(!currentCode || !currentSelectedItem){
         alert('请先在识别框中选择一个光标串码。');
         return;
       }
 
-      const record = terminalCatalog[currentCode] || {
-        sn: '-',
-        domain: '系统无记录',
-        type: '未知',
-        status: '未知',
-        location: '未知'
-      };
+      const record = (currentCode==='SKYWA8EFF0AD' || currentCode.indexOf('sn=SKYWA8EFF0AD')>-1)
+        ? innerMongoliaRecord
+        : (terminalCatalog[currentCode] || {
+            sn:'-',
+            domain:'系统无记录',
+            type:'未知',
+            status:'未知',
+            location:'未知'
+          });
 
-      const exists = currentOrder.devices.some(d => d.code === currentCode);
-      if (exists) {
+      const exists=currentOrder.devices.some(d=>d.code===currentCode);
+      if(exists){
         alert('该设备已在本订单清单中，无需重复添加。');
         return;
       }
@@ -1344,144 +1216,127 @@
         location: record.location
       });
 
-      appendTimeline('扫码并加入设备：' + currentCode);
+      appendTimeline('扫码并加入设备：'+currentCode);
       renderDeviceList();
 
-      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
-      if (idx === -1) {
-        orderHistory.unshift({ ...currentOrder });
-      } else {
-        orderHistory[idx] = { ...currentOrder };
-      }
+      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
+      if(idx===-1) orderHistory.unshift({...currentOrder});
+      else orderHistory[idx]={...currentOrder};
       renderOrderList();
 
-      // 扫完一台后自动关闭弹窗
       scanModal.classList.remove('active');
     });
 
-    btnGoApprove.addEventListener('click', () => {
-      if (!currentOrder) {
+    btnGoApprove.addEventListener('click',()=>{
+      if(!currentOrder){
         alert('请先保存订单基本信息。');
         return;
       }
-      if (!currentOrder.devices.length) {
-        if (!confirm('当前订单设备清单为空，确定要直接进入审批环节吗？')) {
-          return;
-        }
+      if(!currentOrder.devices.length){
+        if(!confirm('当前订单设备清单为空，确定要直接进入审批环节吗？')) return;
       }
       setStepActive(3);
       appendTimeline('进入审批确认环节');
     });
 
-    // ============== 审批演示 ==============
-    btnSubmitApprove.addEventListener('click', () => {
-      if (!currentOrder) {
+    btnSubmitApprove.addEventListener('click',()=>{
+      if(!currentOrder){
         alert('请先完成订单基本信息并至少保存一次。');
         return;
       }
       setOrderStatus('待审批');
-      currentOrder.status = '待审批';
+      currentOrder.status='待审批';
       appendTimeline('提交审批');
-      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
-      if (idx === -1) {
-        orderHistory.unshift({ ...currentOrder });
-      } else {
-        orderHistory[idx] = { ...currentOrder };
-      }
+      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
+      if(idx===-1) orderHistory.unshift({...currentOrder});
+      else orderHistory[idx]={...currentOrder};
       renderOrderList();
     });
 
-    btnApprovePass.addEventListener('click', () => {
-      if (!currentOrder || currentOrder.status !== '待审批') {
+    btnApprovePass.addEventListener('click',()=>{
+      if(!currentOrder || currentOrder.status!=='待审批'){
         alert('当前订单尚未处于“待审批”状态，无法执行审批通过演示。');
         return;
       }
       setOrderStatus('已通过');
-      currentOrder.status = '已通过';
+      currentOrder.status='已通过';
       appendTimeline('审批通过，订单流程完成');
-      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
-      if (idx === -1) {
-        orderHistory.unshift({ ...currentOrder });
-      } else {
-        orderHistory[idx] = { ...currentOrder };
-      }
+      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
+      if(idx===-1) orderHistory.unshift({...currentOrder});
+      else orderHistory[idx]={...currentOrder};
       renderOrderList();
     });
 
-    btnApproveReject.addEventListener('click', () => {
-      if (!currentOrder || currentOrder.status !== '待审批') {
+    btnApproveReject.addEventListener('click',()=>{
+      if(!currentOrder || currentOrder.status!=='待审批'){
         alert('当前订单尚未处于“待审批”状态，无法执行审批驳回演示。');
         return;
       }
       setOrderStatus('已驳回');
-      currentOrder.status = '已驳回';
+      currentOrder.status='已驳回';
       appendTimeline('审批驳回，订单流程终止');
-      const idx = orderHistory.findIndex(o => o.orderNo === currentOrder.orderNo);
-      if (idx === -1) {
-        orderHistory.unshift({ ...currentOrder });
-      } else {
-        orderHistory[idx] = { ...currentOrder };
-      }
+      const idx=orderHistory.findIndex(o=>o.orderNo===currentOrder.orderNo);
+      if(idx===-1) orderHistory.unshift({...currentOrder});
+      else orderHistory[idx]={...currentOrder};
       renderOrderList();
     });
 
-    // ============== 订单列表渲染 ==============
-    function renderOrderList() {
-      orderListEl.innerHTML = '';
-      if (!orderHistory.length) {
-        const div = document.createElement('div');
-        div.style.fontSize = '11px';
-        div.style.color = '#9ca3af';
-        div.textContent = '暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。';
+    function renderOrderList(){
+      orderListEl.innerHTML='';
+      if(!orderHistory.length){
+        const div=document.createElement('div');
+        div.style.fontSize='11px';
+        div.style.color='#9ca3af';
+        div.textContent='暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。';
         orderListEl.appendChild(div);
         return;
       }
 
-      orderHistory.forEach(order => {
-        const item = document.createElement('div');
-        item.className = 'order-item';
+      orderHistory.forEach(order=>{
+        const item=document.createElement('div');
+        item.className='order-item';
 
-        const header = document.createElement('div');
-        header.className = 'order-header';
+        const header=document.createElement('div');
+        header.className='order-header';
 
-        const title = document.createElement('div');
-        title.className = 'order-title';
-        title.textContent = order.orderNo;
+        const title=document.createElement('div');
+        title.className='order-title';
+        title.textContent=order.orderNo;
 
-        const statusSpan = document.createElement('span');
-        statusSpan.className = 'badge-status';
-        statusSpan.textContent = order.status;
-        if (order.status === '草稿') statusSpan.classList.add('badge-draft');
-        if (order.status === '待审批') statusSpan.classList.add('badge-pending');
-        if (order.status === '已通过') statusSpan.classList.add('badge-pass');
-        if (order.status === '已驳回') statusSpan.classList.add('badge-reject');
+        const statusSpan=document.createElement('span');
+        statusSpan.className='badge-status';
+        statusSpan.textContent=order.status;
+        if(order.status==='草稿')statusSpan.classList.add('badge-draft');
+        if(order.status==='待审批')statusSpan.classList.add('badge-pending');
+        if(order.status==='已通过')statusSpan.classList.add('badge-pass');
+        if(order.status==='已驳回')statusSpan.classList.add('badge-reject');
 
         header.appendChild(title);
         header.appendChild(statusSpan);
 
-        const meta1 = document.createElement('div');
-        meta1.className = 'order-meta';
-        const left1 = document.createElement('span');
-        left1.textContent = order.type + ' | 设备数：' + order.devices.length;
-        const right1 = document.createElement('span');
-        right1.textContent = '创建人：' + order.creator;
+        const meta1=document.createElement('div');
+        meta1.className='order-meta';
+        const left1=document.createElement('span');
+        left1.textContent=order.type+' | 设备数：'+order.devices.length;
+        const right1=document.createElement('span');
+        right1.textContent='创建人：'+order.creator;
         meta1.appendChild(left1);
         meta1.appendChild(right1);
 
-        const meta2 = document.createElement('div');
-        meta2.className = 'order-meta';
-        const left2 = document.createElement('span');
-        left2.textContent = '调出：' + order.fromStore;
-        const right2 = document.createElement('span');
-        right2.textContent = '调入：' + order.toStore;
+        const meta2=document.createElement('div');
+        meta2.className='order-meta';
+        const left2=document.createElement('span');
+        left2.textContent='调出：'+order.fromStore;
+        const right2=document.createElement('span');
+        right2.textContent='调入：'+order.toStore;
         meta2.appendChild(left2);
         meta2.appendChild(right2);
 
-        const tagRow = document.createElement('div');
-        tagRow.style.marginTop = '4px';
-        const tag = document.createElement('span');
-        tag.className = 'tag';
-        tag.textContent = '点击回填到当前订单';
+        const tagRow=document.createElement('div');
+        tagRow.style.marginTop='4px';
+        const tag=document.createElement('span');
+        tag.className='tag';
+        tag.textContent='点击回填到当前订单';
         tagRow.appendChild(tag);
 
         item.appendChild(header);
@@ -1489,18 +1344,18 @@
         item.appendChild(meta2);
         item.appendChild(tagRow);
 
-        item.addEventListener('click', () => {
-          currentOrder = { ...order };
-          fieldOrderType.value = order.type;
-          fieldOrderNo.value = order.orderNo;
-          fieldFromStore.value = order.fromStore;
-          fieldToStore.value = order.toStore;
-          fieldCreator.value = order.creator;
-          fieldPhone.value = order.phone || '';
-          fieldRemark.value = order.remark || '';
+        item.addEventListener('click',()=>{
+          currentOrder={...order};
+          fieldOrderType.value=order.type;
+          fieldOrderNo.value=order.orderNo;
+          fieldFromStore.value=order.fromStore;
+          fieldToStore.value=order.toStore;
+          fieldCreator.value=order.creator;
+          fieldPhone.value=order.phone||'';
+          fieldRemark.value=order.remark||'';
           setOrderStatus(order.status);
           renderDeviceList();
-          appendTimeline('从订单列表回填订单：' + order.orderNo);
+          appendTimeline('从订单列表回填订单：'+order.orderNo);
           document.querySelector('.tab-item[data-view="transfer"]').click();
         });
 
