@@ -1,238 +1,230 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>AMS 家客终端管理 · 扫码记录查询</title>
+  <title>家宽运维支撑系统· 扫码记录查询</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       background: #f3f4f6;
       color: #111827;
     }
-    a { color: inherit; text-decoration: none; }
+    a { text-decoration: none; color: inherit; }
 
     .layout {
-      display: flex;
-      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      height: 100vh;
     }
 
-    /* 左侧菜单 */
+    /* 侧边栏 */
     .sidebar {
-      width: 220px;
-      background: #111827;
+      background: #0f172a;
       color: #e5e7eb;
-      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
     }
-    .sidebar-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 18px;
+    .sidebar-header {
+      height: 56px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(148,163,184,0.4);
+      font-size: 16px;
+      font-weight: 600;
     }
-    .sidebar-title span.logo {
-      width: 24px;
-      height: 24px;
+    .sidebar-header span.logo {
+      width: 28px;
+      height: 28px;
       border-radius: 8px;
       background: linear-gradient(135deg,#2563eb,#06b6d4);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
+      font-size: 16px;
+      margin-right: 8px;
     }
-
     .menu-group-title {
       font-size: 12px;
-      text-transform: uppercase;
       color: #9ca3af;
-      margin: 12px 4px 6px;
+      padding: 16px 16px 4px;
     }
     .menu-item {
-      font-size: 14px;
-      padding: 8px 10px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      color: #e5e7eb;
     }
-    .menu-item span.left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .menu-item:hover {
-      background: #1f2937;
+    .menu-item span.icon {
+      margin-right: 6px;
+      font-size: 15px;
     }
     .menu-item.active {
-      background: #2563eb;
-      color: #fff;
+      background: rgba(37,99,235,0.18);
+      color: #ffffff;
     }
-    .menu-sub {
-      margin-top: 4px;
-      margin-left: 26px;
-      border-left: 1px solid #374151;
-      padding-left: 6px;
+    .submenu {
+      padding-left: 34px;
+      padding-bottom: 10px;
     }
-    .menu-sub-item {
+    .submenu-item {
       font-size: 13px;
-      padding: 6px 8px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
-      color: #d1d5db;
+      color: #cbd5f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .menu-sub-item.active {
-      background: rgba(37,99,235,0.25);
+    .submenu-item.active {
+      background: #1d4ed8;
       color: #fff;
     }
-    .menu-sub-item:hover {
-      background: #1f2937;
+
+    /* 顶部栏 + 内容 */
+    .main {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .topbar {
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 14px;
+    }
+    .breadcrumb {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .breadcrumb span.current {
+      color: #111827;
+      font-weight: 500;
+    }
+    .topbar-right {
+      font-size: 12px;
+      color: #6b7280;
     }
 
-    /* 右侧内容区 */
     .content {
       flex: 1;
-      padding: 16px 20px 24px;
+      overflow-y: auto;
+      padding: 18px 20px 24px;
     }
 
-    .breadcrumb {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 10px;
-    }
-    .breadcrumb span.sep {
-      margin: 0 4px;
-    }
-
-    .page-title-row {
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-    }
-    .page-title-main {
-      font-size: 20px;
-      font-weight: 600;
     }
     .page-title-sub {
       font-size: 12px;
       color: #6b7280;
-      margin-top: 4px;
     }
 
-    .page-actions {
+    /* 筛选卡片 */
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+      padding: 14px 14px 10px;
+      margin-bottom: 14px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4,minmax(0,1fr));
+      gap: 10px 12px;
+      font-size: 13px;
+      align-items: center;
+    }
+    .form-item {
       display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-label {
+      width: 96px;
+      text-align: right;
+      font-size: 12px;
+      color: #4b5563;
+      white-space: nowrap;
+    }
+    .form-control {
+      flex: 1;
+    }
+    select, input[type="text"], input[type="date"] {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      padding: 5px 8px;
+      font-size: 12px;
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus, input[type="date"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.18);
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
       gap: 8px;
     }
     .btn {
-      font-size: 13px;
-      padding: 6px 12px;
+      font-size: 12px;
       border-radius: 999px;
       border: 1px solid #d1d5db;
-      background: #fff;
-      color: #374151;
+      padding: 6px 16px;
+      background: #ffffff;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
     .btn-primary {
-      background: linear-gradient(135deg,#2563eb,#1d4ed8);
-      border-color: #1d4ed8;
-      color: #fff;
-    }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* 卡片 */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .card-title::before {
-      content: "";
-      width: 3px;
-      height: 14px;
-      border-radius: 999px;
       background: #2563eb;
-    }
-    .card-subtitle {
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    /* 查询条件 */
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px 12px;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-    .filter-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .filter-label {
-      color: #4b5563;
-    }
-    .filter-label .required {
-      color: #ef4444;
-      margin-left: 2px;
-    }
-    .filter-input, .filter-select {
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      padding: 5px 8px;
-      font-size: 12px;
-      outline: none;
-      width: 100%;
-    }
-    .filter-input:focus, .filter-select:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 1px rgba(37,99,235,0.15);
+      color: #ffffff;
     }
-
-    .filter-actions {
-      margin-top: 4px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
+    .btn-outline {
+      background: #ffffff;
+      color: #374151;
+    }
+    .btn-secondary {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
     }
 
     /* 表格 */
+    .table-wrapper {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+      padding: 10px 14px 12px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
     }
     thead {
-      background: #f3f4f6;
+      background: #f9fafb;
     }
     th, td {
       padding: 8px 6px;
@@ -244,41 +236,39 @@
       color: #4b5563;
       font-weight: 500;
     }
-    tbody tr:hover {
+    tbody tr:nth-child(even) {
       background: #f9fafb;
     }
-    .badge {
-      font-size: 11px;
-      padding: 2px 8px;
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
       border-radius: 999px;
-      display: inline-block;
+      font-size: 11px;
+      line-height: 18px;
     }
-    .badge-success {
+    .tag-success {
       background: #dcfce7;
       color: #166534;
     }
-    .badge-fail {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-    .badge-warn {
+    .tag-warning {
       background: #fef3c7;
       color: #92400e;
     }
-
-    .text-muted {
-      color: #6b7280;
+    .tag-danger {
+      background: #fee2e2;
+      color: #b91c1c;
     }
-    .link-btn {
+    .tag-gray {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .text-link {
       font-size: 12px;
       color: #2563eb;
       cursor: pointer;
-      border: none;
-      background: transparent;
-      padding: 0;
     }
 
-    /* 分页 */
     .table-footer {
       margin-top: 8px;
       display: flex;
@@ -287,169 +277,236 @@
       font-size: 12px;
       color: #6b7280;
     }
-    .pagination {
-      display: flex;
+    .pager {
+      display: inline-flex;
       gap: 4px;
       align-items: center;
     }
-    .pagination button {
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 6px;
+    .pager button {
+      border-radius: 4px;
       border: 1px solid #d1d5db;
-      background: #fff;
+      background: #ffffff;
+      padding: 2px 6px;
+      font-size: 11px;
       cursor: pointer;
     }
-    .pagination button.active {
+    .pager button.active {
       background: #2563eb;
-      color: #fff;
+      color: #ffffff;
       border-color: #2563eb;
+    }
+
+    /* 弹窗 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal {
+      width: 720px;
+      max-width: 96%;
+      max-height: 80vh;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+    .modal-title {
+      font-weight: 600;
+    }
+    .modal-close {
+      cursor: pointer;
+      font-size: 18px;
+      color: #6b7280;
+    }
+    .modal-body {
+      padding: 10px 14px 12px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 8px 16px;
+      margin-bottom: 8px;
+    }
+    .detail-label {
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+    .detail-value {
+      font-weight: 500;
+    }
+    pre.detail-json {
+      background: #0b1120;
+      color: #e5e7eb;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
 <div class="layout">
-  <!-- 左侧菜单 -->
+  <!-- 侧边栏 -->
   <aside class="sidebar">
-    <div class="sidebar-title">
+    <div class="sidebar-header">
       <span class="logo">A</span>
       <span>AMS 家客终端管理</span>
     </div>
 
-    <div class="menu-group">
+    <div>
       <div class="menu-group-title">终端运营</div>
       <div class="menu-item">
-        <span class="left">
-          <span>📦</span>
-          <span>调拨出入库</span>
-        </span>
+        <span class="icon">📦</span>
+        <span>调拨出入库</span>
       </div>
-      <!-- 其他菜单略 -->
-    </div>
 
-    <div class="menu-group">
       <div class="menu-group-title">风控 & 记录</div>
       <div class="menu-item active">
-        <span class="left">
-          <span>📷</span>
-          <span>扫码记录管理</span>
-        </span>
-        <span>▾</span>
+        <span class="icon">📋</span>
+        <span>扫码记录管理</span>
       </div>
-      <div class="menu-sub">
-        <div class="menu-sub-item active">扫码记录查询</div>
-        <!-- 预留：扫码质量分析等 -->
+      <div class="submenu">
+        <div class="submenu-item active">
+          <span>扫码记录查询</span>
+        </div>
       </div>
     </div>
   </aside>
 
-  <!-- 右侧内容 -->
-  <main class="content">
-    <div class="breadcrumb">
-      首页 <span class="sep">/</span> 扫码记录管理 <span class="sep">/</span> 扫码记录查询
-    </div>
-
-    <div class="page-title-row">
+  <!-- 主区域 -->
+  <div class="main">
+    <header class="topbar">
       <div>
-        <div class="page-title-main">扫码记录查询</div>
-        <div class="page-title-sub">
-          查询并导出 APP 端调拨出入库扫码记录，串联扫码行为与业务工单。
+        <div class="breadcrumb">
+          终端运营平台 / 扫码记录管理 / <span class="current">扫码记录查询</span>
         </div>
       </div>
-      <div class="page-actions">
-        <button id="btnExport" class="btn">⬇ 导出</button>
-        <button class="btn">⚙ 字段配置</button>
+      <div class="topbar-right">
+        支持按业务类型、扫码结果、操作人、工号、扫码来源等组合查询
       </div>
-    </div>
+    </header>
 
-    <!-- 查询条件 -->
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">查询条件</div>
-        <div class="card-subtitle">支持按业务类型、时间、操作人、工单号、扫码结果等维度组合过滤。</div>
-      </div>
-
-      <div class="filter-grid">
-        <div class="filter-item">
-          <label class="filter-label">业务类型</label>
-          <select id="fBizType" class="filter-select">
-            <option value="">全部</option>
-            <option value="调拨出库">调拨出库</option>
-            <option value="调拨入库">调拨入库</option>
-            <option value="装机出库">装机出库</option>
-            <option value="回收入库">回收入库</option>
-          </select>
+    <main class="content">
+      <div class="page-title">
+        <div>
+          扫码记录查询
+          <div class="page-title-sub">查询并导出 APP 端调拨出入库扫码行为与业务工单的关联记录</div>
         </div>
-
-        <div class="filter-item">
-          <label class="filter-label">扫码结果</label>
-          <select id="fResultType" class="filter-select">
-            <option value="">全部</option>
-            <option value="成功">成功</option>
-            <option value="台账无记录">台账无记录</option>
-            <option value="重复扫码">重复扫码</option>
-            <option value="校验失败">校验失败</option>
-          </select>
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">业务工单号 / 订单号</label>
-          <input id="fOrderNo" class="filter-input" placeholder="支持模糊查询">
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">设备识别码（串码）</label>
-          <input id="fCode" class="filter-input" placeholder="SN 或条码内容">
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">操作人姓名 / 工号</label>
-          <input id="fOperator" class="filter-input" placeholder="如：张三 / 1008611">
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">扫码来源</label>
-          <select id="fSource" class="filter-select">
-            <option value="">全部</option>
-            <option value="装维APP">装维APP</option>
-            <option value="仓库WEB">仓库WEB</option>
-          </select>
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">操作时间起</label>
-          <input id="fTimeStart" type="datetime-local" class="filter-input">
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">操作时间止</label>
-          <input id="fTimeEnd" type="datetime-local" class="filter-input">
-        </div>
+        <button id="btnExport" class="btn btn-secondary">⬇ 导出当前结果</button>
       </div>
 
-      <div class="filter-actions">
-        <button id="btnReset" class="btn">重置</button>
-        <button id="btnSearch" class="btn btn-primary">🔍 查询</button>
-      </div>
-    </section>
+      <!-- 筛选条件 -->
+      <section class="card">
+        <div class="filter-grid">
+          <div class="form-item">
+            <label class="form-label">业务类型</label>
+            <div class="form-control">
+              <select id="filterBizType">
+                <option value="">全部</option>
+                <option value="调拨出库">调拨出库</option>
+                <option value="调拨入库">调拨入库</option>
+              </select>
+            </div>
+          </div>
 
-    <!-- 查询结果 -->
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">扫码记录列表</div>
-        <div class="card-subtitle">
-          记录 APP 端每一次扫码行为的关键字段：业务类型、操作人、工单号、设备识别码、返回结果等。
+          <div class="form-item">
+            <label class="form-label">扫码结果</label>
+            <div class="form-control">
+              <select id="filterScanResult">
+                <option value="">全部</option>
+                <option value="成功">成功</option>
+                <option value="台账无记录">台账无记录</option>
+                <option value="重复扫码">重复扫码</option>
+                <option value="校验失败">校验失败</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">扫码来源</label>
+            <div class="form-control">
+              <select id="filterSource">
+                <option value="">全部</option>
+                <option value="装维APP">装维APP</option>
+                <option value="WEB">WEB</option>
+                <option value="接口服务">接口服务</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">业务工单号 / 订单号</label>
+            <div class="form-control">
+              <input id="filterBizOrderNo" type="text" placeholder="支持模糊查询">
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">设备识别码（串码）</label>
+            <div class="form-control">
+              <input id="filterSn" type="text" placeholder="SN 或条码内容">
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">操作人姓名 / 工号</label>
+            <div class="form-control">
+              <input id="filterOperator" type="text" placeholder="如：张三 / 1008611">
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">操作时间起</label>
+            <div class="form-control">
+              <input id="filterStartDate" type="date">
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">操作时间止</label>
+            <div class="form-control">
+              <input id="filterEndDate" type="date">
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div style="overflow-x:auto;">
-        <table id="resultTable">
+        <div class="filter-actions">
+          <button id="btnReset" class="btn btn-outline">重置</button>
+          <button id="btnSearch" class="btn btn-primary">查询</button>
+        </div>
+      </section>
+
+      <!-- 结果列表 -->
+      <section class="table-wrapper">
+        <table>
           <thead>
           <tr>
-            <th>序号</th>
+            <th style="width:40px;">序号</th>
             <th>业务类型</th>
-            <th>业务工单号</th>
-            <th>设备识别码</th>
+            <th>业务工单号 / 订单号</th>
+            <th>设备识别码（串码）</th>
             <th>扫码结果</th>
             <th>台账匹配结果</th>
             <th>返回结果描述</th>
@@ -461,219 +518,240 @@
             <th>操作</th>
           </tr>
           </thead>
-          <tbody id="resultBody">
-          <!-- JS 填充 -->
+          <tbody id="tableBody">
+          <!-- JS 渲染 -->
           </tbody>
         </table>
-      </div>
 
-      <div class="table-footer">
-        <div id="summaryText">共 0 条记录</div>
-        <div class="pagination">
-          <button id="prevPage">&lt;</button>
-          <button id="pageInfo" class="active">1 / 1</button>
-          <button id="nextPage">&gt;</button>
+        <div class="table-footer">
+          <span id="summaryText">共 0 条记录</span>
+          <div class="pager">
+            <button id="btnPrev">&lt;</button>
+            <button id="pageInfo" class="active">1 / 1</button>
+            <button id="btnNext">&gt;</button>
+          </div>
         </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div id="detailModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">扫码详情</div>
+      <div id="btnDetailClose" class="modal-close">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid" id="detailGrid">
+        <!-- JS 填充关键字段 -->
       </div>
-    </section>
-  </main>
+      <div style="margin-bottom:4px;font-size:12px;color:#4b5563;">请求 / 响应原文：</div>
+      <pre id="detailRaw" class="detail-json"></pre>
+    </div>
+  </div>
 </div>
 
 <script>
-  // 模拟扫码记录数据（后续可替换为接口返回）
-  const allRecords = [
+  // ======== 模拟后端返回的“调拨出库 / 调拨入库”扫码记录 ========
+  const allRows = [
     {
+      id: 1,
       bizType: '调拨出库',
-      orderNo: 'DBDD202412050930',
-      code: 'SN1234567890',
-      resultType: '成功',
-      ledgerMatch: '已匹配台账',
-      resultMsg: '校验通过，加入调拨出库订单。',
+      bizOrderNo: 'DBDD202412050930',
+      sn: 'SN1234567890',
+      scanResult: '成功',
+      matchResult: '已匹配台账',
+      description: '校验通过，加入调拨出库订单。',
       operator: '张三 / 1008611',
       source: '装维APP',
       opTime: '2024-12-05 09:30:21',
-      durationMs: 128,
-      requestId: 'REQ-20241205-0001'
+      duration: 128,
+      reqId: 'REQ-20241205-0001',
+      raw: {
+        request: { url: '/api/scan/dispatch-out', sn: 'SN1234567890', orderNo: 'DBDD202412050930' },
+        response: { code: 0, msg: 'OK', match: true }
+      }
     },
     {
+      id: 2,
       bizType: '调拨出库',
-      orderNo: 'DBDD202412050930',
-      code: 'SN2233445566',
-      resultType: '台账无记录',
-      ledgerMatch: '系统无记录',
-      resultMsg: '未在终端台账中找到对应串码。',
+      bizOrderNo: 'DBDD202412050930',
+      sn: 'SN2233445566',
+      scanResult: '台账无记录',
+      matchResult: '系统无台账记录',
+      description: '未在终端台账中找到匹配串码。',
       operator: '张三 / 1008611',
       source: '装维APP',
-      opTime: '2024-12-05 09:31:02',
-      durationMs: 156,
-      requestId: 'REQ-20241205-0002'
+      opTime: '2024-12-05 09:30:32',
+      duration: 156,
+      reqId: 'REQ-20241205-0002',
+      raw: {
+        request: { url: '/api/scan/dispatch-out', sn: 'SN2233445566', orderNo: 'DBDD202412050930' },
+        response: { code: 1001, msg: 'SN not found in catalog' }
+      }
     },
     {
+      id: 3,
       bizType: '调拨入库',
-      orderNo: 'DBDD202412041530',
-      code: 'SN9988776655',
-      resultType: '重复扫码',
-      ledgerMatch: '已在本单清单中',
-      resultMsg: '当前订单已存在该设备，系统阻止重复入库。',
+      bizOrderNo: 'DBDD202412041530',
+      sn: 'SN9988776655',
+      scanResult: '重复扫码',
+      matchResult: '已在本单申请单中',
+      description: '当前订单已存在该设备，系统阻止重复入库。',
       operator: '李四 / 1008612',
       source: '装维APP',
-      opTime: '2024-12-04 15:30:47',
-      durationMs: 102,
-      requestId: 'REQ-20241204-0201'
+      opTime: '2024-12-04 13:14:09',
+      duration: 102,
+      reqId: 'REQ-20241204-0001',
+      raw: {
+        request: { url: '/api/scan/dispatch-in', sn: 'SN9988776655', orderNo: 'DBDD202412041530' },
+        response: { code: 1002, msg: 'Duplicate SN for current order' }
+      }
     },
     {
-      bizType: '装机出库',
-      orderNo: 'ZJDD202412031110',
-      code: 'SN0000000000',
-      resultType: '校验失败',
-      ledgerMatch: '串码与终端类型不符',
-      resultMsg: '装机工单要求“光猫”，当前串码台账类型为“机顶盒”，校验不通过。',
+      id: 4,
+      bizType: '调拨出库',
+      bizOrderNo: 'ZJDD202412031110',
+      sn: 'SN0000000000',
+      scanResult: '校验失败',
+      matchResult: '串码与终端类型不符',
+      description: '装机工单要求“光猫”，当前串码台账终端类型为“机顶盒”，校验不通过。',
       operator: '王五 / 1008613',
       source: '装维APP',
       opTime: '2024-12-03 11:10:05',
-      durationMs: 210,
-      requestId: 'REQ-20241203-0309'
+      duration: 210,
+      reqId: 'REQ-20241203-0009',
+      raw: {
+        request: { url: '/api/scan/dispatch-out', sn: 'SN0000000000', orderNo: 'ZJDD202412031110' },
+        response: { code: 1003, msg: 'Device type mismatch' }
+      }
     }
   ];
 
-  let filteredRecords = [...allRecords];
-  let pageSize = 10;
+  // 简单分页：每页 10 条
+  const pageSize = 10;
   let currentPage = 1;
+  let currentFiltered = [...allRows];
 
-  const resultBody = document.getElementById('resultBody');
+  const tableBody = document.getElementById('tableBody');
   const summaryText = document.getElementById('summaryText');
   const pageInfo = document.getElementById('pageInfo');
-  const prevPageBtn = document.getElementById('prevPage');
-  const nextPageBtn = document.getElementById('nextPage');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
 
   function renderTable() {
-    resultBody.innerHTML = '';
-    const total = filteredRecords.length;
-    const pageCount = Math.max(1, Math.ceil(total / pageSize));
-    if (currentPage > pageCount) currentPage = pageCount;
+    const total = currentFiltered.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    if (currentPage > totalPages) currentPage = totalPages;
 
     const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    const pageData = filteredRecords.slice(start, end);
+    const pageRows = currentFiltered.slice(start, start + pageSize);
 
-    pageData.forEach((rec, idx) => {
+    tableBody.innerHTML = '';
+    pageRows.forEach((row, index) => {
       const tr = document.createElement('tr');
 
       const tdIndex = document.createElement('td');
-      tdIndex.textContent = start + idx + 1;
+      tdIndex.textContent = start + index + 1;
       tr.appendChild(tdIndex);
 
       const tdBizType = document.createElement('td');
-      tdBizType.textContent = rec.bizType;
+      tdBizType.textContent = row.bizType;
       tr.appendChild(tdBizType);
 
-      const tdOrderNo = document.createElement('td');
-      const link = document.createElement('button');
-      link.className = 'link-btn';
-      link.textContent = rec.orderNo;
-      link.title = '点击跳转至调拨出入库订单详情（示意）';
-      link.onclick = () => alert('此处可跳转到订单详情页：' + rec.orderNo);
-      tdOrderNo.appendChild(link);
-      tr.appendChild(tdOrderNo);
+      const tdBizOrder = document.createElement('td');
+      tdBizOrder.textContent = row.bizOrderNo;
+      tr.appendChild(tdBizOrder);
 
-      const tdCode = document.createElement('td');
-      tdCode.textContent = rec.code;
-      tr.appendChild(tdCode);
+      const tdSn = document.createElement('td');
+      tdSn.textContent = row.sn;
+      tr.appendChild(tdSn);
 
-      const tdResult = document.createElement('td');
-      const spanResult = document.createElement('span');
-      spanResult.className = 'badge ';
-      if (rec.resultType === '成功') {
-        spanResult.className += 'badge-success';
-      } else if (rec.resultType === '台账无记录' || rec.resultType === '校验失败') {
-        spanResult.className += 'badge-fail';
-      } else {
-        spanResult.className += 'badge-warn';
-      }
-      spanResult.textContent = rec.resultType;
-      tdResult.appendChild(spanResult);
-      tr.appendChild(tdResult);
+      const tdScanResult = document.createElement('td');
+      const tagScan = document.createElement('span');
+      tagScan.className = 'tag ' + (
+        row.scanResult === '成功' ? 'tag-success' :
+          (row.scanResult === '校验失败' ? 'tag-danger' : 'tag-warning')
+      );
+      tagScan.textContent = row.scanResult;
+      tdScanResult.appendChild(tagScan);
+      tr.appendChild(tdScanResult);
 
-      const tdLedger = document.createElement('td');
-      tdLedger.textContent = rec.ledgerMatch;
-      tr.appendChild(tdLedger);
+      const tdMatch = document.createElement('td');
+      tdMatch.textContent = row.matchResult;
+      tr.appendChild(tdMatch);
 
-      const tdMsg = document.createElement('td');
-      tdMsg.textContent = rec.resultMsg;
-      tr.appendChild(tdMsg);
+      const tdDesc = document.createElement('td');
+      tdDesc.textContent = row.description;
+      tr.appendChild(tdDesc);
 
       const tdOp = document.createElement('td');
-      tdOp.textContent = rec.operator;
+      tdOp.textContent = row.operator;
       tr.appendChild(tdOp);
 
       const tdSource = document.createElement('td');
-      tdSource.textContent = rec.source;
+      tdSource.textContent = row.source;
       tr.appendChild(tdSource);
 
       const tdTime = document.createElement('td');
-      tdTime.textContent = rec.opTime;
+      tdTime.textContent = row.opTime;
       tr.appendChild(tdTime);
 
       const tdDur = document.createElement('td');
-      tdDur.textContent = rec.durationMs;
+      tdDur.textContent = row.duration;
       tr.appendChild(tdDur);
 
       const tdReq = document.createElement('td');
-      tdReq.textContent = rec.requestId;
+      tdReq.textContent = row.reqId;
       tr.appendChild(tdReq);
 
       const tdAction = document.createElement('td');
-      const btnDetail = document.createElement('button');
-      btnDetail.className = 'link-btn';
-      btnDetail.textContent = '查看报文';
-      btnDetail.onclick = () => {
-        alert(
-          '这里可展示请求/响应报文明细\n\n' +
-          '请求ID：' + rec.requestId + '\n' +
-          '业务工单号：' + rec.orderNo + '\n' +
-          '设备识别码：' + rec.code + '\n' +
-          '返回结果：' + rec.resultMsg
-        );
-      };
-      tdAction.appendChild(btnDetail);
+      const a = document.createElement('span');
+      a.className = 'text-link';
+      a.textContent = '查看详情';
+      a.addEventListener('click', () => openDetail(row));
+      tdAction.appendChild(a);
       tr.appendChild(tdAction);
 
-      resultBody.appendChild(tr);
+      tableBody.appendChild(tr);
     });
 
     summaryText.textContent = `共 ${total} 条记录`;
-    pageInfo.textContent = `${currentPage} / ${pageCount}`;
+    pageInfo.textContent = `${total === 0 ? 0 : currentPage} / ${Math.max(1, totalPages)}`;
   }
 
+  // 筛选
   function applyFilter() {
-    const fBizType = document.getElementById('fBizType').value.trim();
-    const fResultType = document.getElementById('fResultType').value.trim();
-    const fOrderNo = document.getElementById('fOrderNo').value.trim();
-    const fCode = document.getElementById('fCode').value.trim();
-    const fOperator = document.getElementById('fOperator').value.trim();
-    const fSource = document.getElementById('fSource').value.trim();
-    const fTimeStart = document.getElementById('fTimeStart').value;
-    const fTimeEnd = document.getElementById('fTimeEnd').value;
+    const bizType = document.getElementById('filterBizType').value.trim();
+    const scanResult = document.getElementById('filterScanResult').value.trim();
+    const source = document.getElementById('filterSource').value.trim();
+    const bizOrderNo = document.getElementById('filterBizOrderNo').value.trim();
+    const sn = document.getElementById('filterSn').value.trim();
+    const operator = document.getElementById('filterOperator').value.trim();
+    const startDate = document.getElementById('filterStartDate').value;
+    const endDate = document.getElementById('filterEndDate').value;
 
-    filteredRecords = allRecords.filter(rec => {
-      if (fBizType && rec.bizType !== fBizType) return false;
-      if (fResultType && rec.resultType !== fResultType) return false;
-      if (fSource && rec.source !== fSource) return false;
-      if (fOrderNo && !rec.orderNo.includes(fOrderNo)) return false;
-      if (fCode && !rec.code.includes(fCode)) return false;
-      if (fOperator && !rec.operator.includes(fOperator)) return false;
+    currentFiltered = allRows.filter(row => {
+      if (bizType && row.bizType !== bizType) return false;
+      if (scanResult && row.scanResult !== scanResult) return false;
+      if (source && row.source !== source) return false;
+      if (bizOrderNo && !row.bizOrderNo.includes(bizOrderNo)) return false;
+      if (sn && !row.sn.includes(sn)) return false;
+      if (operator && row.operator.indexOf(operator) === -1) return false;
 
-      if (fTimeStart) {
-        const tStart = new Date(fTimeStart.replace('T', ' '));
-        const tRec = new Date(rec.opTime.replace(/-/g, '/'));
-        if (tRec < tStart) return false;
+      if (startDate || endDate) {
+        const ts = new Date(row.opTime.replace(/-/g,'/')).getTime();
+        if (startDate) {
+          const s = new Date(startDate + ' 00:00:00').getTime();
+          if (ts < s) return false;
+        }
+        if (endDate) {
+          const e = new Date(endDate + ' 23:59:59').getTime();
+          if (ts > e) return false;
+        }
       }
-      if (fTimeEnd) {
-        const tEnd = new Date(fTimeEnd.replace('T', ' '));
-        const tRec = new Date(rec.opTime.replace(/-/g, '/'));
-        if (tRec > tEnd) return false;
-      }
-
       return true;
     });
 
@@ -682,34 +760,120 @@
   }
 
   document.getElementById('btnSearch').addEventListener('click', applyFilter);
+
   document.getElementById('btnReset').addEventListener('click', () => {
-    document.querySelectorAll('.filter-input').forEach(i => i.value = '');
-    document.querySelectorAll('.filter-select').forEach(s => s.value = '');
-    filteredRecords = [...allRecords];
+    ['filterBizType','filterScanResult','filterSource',
+      'filterBizOrderNo','filterSn','filterOperator',
+      'filterStartDate','filterEndDate'
+    ].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    currentFiltered = [...allRows];
     currentPage = 1;
     renderTable();
   });
 
-  prevPageBtn.addEventListener('click', () => {
+  btnPrev.addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
       renderTable();
     }
   });
-  nextPageBtn.addEventListener('click', () => {
-    const pageCount = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
-    if (currentPage < pageCount) {
+  btnNext.addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(currentFiltered.length / pageSize));
+    if (currentPage < totalPages) {
       currentPage++;
       renderTable();
     }
   });
 
+  // 详情弹框
+  const detailModal = document.getElementById('detailModal');
+  const btnDetailClose = document.getElementById('btnDetailClose');
+  const detailGrid = document.getElementById('detailGrid');
+  const detailRaw = document.getElementById('detailRaw');
+
+  function openDetail(row) {
+    detailGrid.innerHTML = '';
+    const fields = [
+      ['业务类型', row.bizType],
+      ['业务工单号 / 订单号', row.bizOrderNo],
+      ['设备识别码（串码）', row.sn],
+      ['扫码结果', row.scanResult],
+      ['台账匹配结果', row.matchResult],
+      ['返回结果描述', row.description],
+      ['操作人', row.operator],
+      ['扫码来源', row.source],
+      ['操作时间', row.opTime],
+      ['耗时(ms)', row.duration.toString()],
+      ['请求ID', row.reqId]
+    ];
+    fields.forEach(([label, value]) => {
+      const wrapper = document.createElement('div');
+      const l = document.createElement('div');
+      l.className = 'detail-label';
+      l.textContent = label;
+      const v = document.createElement('div');
+      v.className = 'detail-value';
+      v.textContent = value;
+      wrapper.appendChild(l);
+      wrapper.appendChild(v);
+      detailGrid.appendChild(wrapper);
+    });
+
+    detailRaw.textContent = JSON.stringify(row.raw, null, 2);
+    detailModal.classList.add('active');
+  }
+
+  btnDetailClose.addEventListener('click', () => {
+    detailModal.classList.remove('active');
+  });
+  detailModal.addEventListener('click', (e) => {
+    if (e.target === detailModal) {
+      detailModal.classList.remove('active');
+    }
+  });
+
+  // 导出 CSV（导出当前筛选结果）
   document.getElementById('btnExport').addEventListener('click', () => {
-    // 这里仅做示意，实际可改为导出 CSV / Excel
-    alert(`导出当前查询结果，共 ${filteredRecords.length} 条记录（可对接后端导出接口）。`);
+    if (!currentFiltered.length) {
+      alert('当前无可导出的记录。');
+      return;
+    }
+    const header = [
+      '业务类型','业务工单号/订单号','设备识别码（串码）','扫码结果',
+      '台账匹配结果','返回结果描述','操作人','扫码来源',
+      '操作时间','耗时(ms)','请求ID'
+    ];
+    const lines = [header.join(',')];
+    currentFiltered.forEach(r => {
+      lines.push([
+        r.bizType,
+        r.bizOrderNo,
+        r.sn,
+        r.scanResult,
+        r.matchResult,
+        `"${r.description.replace(/"/g,'""')}"`,
+        r.operator,
+        r.source,
+        r.opTime,
+        r.duration,
+        r.reqId
+      ].join(','));
+    });
+    const blob = new Blob([lines.join('\n')], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'scan-log-export.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
   // 初始化
+  currentFiltered = [...allRows];
   renderTable();
 </script>
 </body>
