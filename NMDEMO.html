@@ -950,13 +950,15 @@
       { code:"SKYWA8EFF0AD", type:"一维码" },
       { code:"ssid1=None&wifipwd=None&username=user&userpwd=jnh6@9Xe&model=model18&sn=SKYWA8EFF0AD&ip=192.168.1.1&vendor=NMTY&productname=TEWA-7100A&date=202410&lanability=GE,GE,GE,GE", type:"二维码" }
     ];
+const cameraVideo=document.getElementById('cameraVideo');
+const cameraStatus=document.getElementById('cameraStatus');
+const btnOpenCamera=document.getElementById('btnOpenCamera');
+const btnStopCamera=document.getElementById('btnStopCamera');
+// 手动示例按钮（当前页面没有这个按钮，可能为 null）
+const btnMockScan=document.getElementById('btnMockScan');
+const codeTagsContainer=document.getElementById('codeTags');
 
-    const cameraVideo=document.getElementById('cameraVideo');
-    const cameraStatus=document.getElementById('cameraStatus');
-    const btnOpenCamera=document.getElementById('btnOpenCamera');
-    const btnStopCamera=document.getElementById('btnStopCamera');
-    const btnMockScan=document.getElementById('btnMockScan');
-    const codeTagsContainer=document.getElementById('codeTags');
+
 
     const summaryCount=document.getElementById('summaryCount');
     const summaryType=document.getElementById('summaryType');
@@ -1062,16 +1064,19 @@
       summaryTime.textContent=new Date().toLocaleString();
     }
 
-    // 手动示例按钮
-    btnMockScan.addEventListener('click',()=>{
-      renderCodeTags(mockRecognizedCodes);
-      const first=mockRecognizedCodes[0];
-      if(first){
-        const firstTag=document.querySelector('.code-tag[data-index="0"]');
-        if(firstTag) firstTag.classList.add('active');
-        onCodeSelected(first);
-      }
-    });
+// 手动示例按钮（如果页面上没有该按钮，就不绑定事件，避免报错）
+if (btnMockScan) {
+  btnMockScan.addEventListener('click', () => {
+    renderCodeTags(mockRecognizedCodes);
+    const first = mockRecognizedCodes[0];
+    if (first) {
+      const firstTag = document.querySelector('.code-tag[data-index="0"]');
+      if (firstTag) firstTag.classList.add('active');
+      onCodeSelected(first);
+    }
+  });
+}
+
 
     function onCodeSelected(item){
       currentCode=item.code;
