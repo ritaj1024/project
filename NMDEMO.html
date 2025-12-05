@@ -730,6 +730,18 @@
         <div class="card">
           <div class="card-header">
             <span>4. 工单提交与闭环</span>
+
+                      <div class="hint">
+            ※ 工单未提交前可随时修改或删除详情数据；提交后生成正式故障工单，用于后续派单处理与闭环回访。
+          </div>
+
+          <!-- 新增：故障工单流转记录 -->
+          <div class="divider"></div>
+          <div class="card-subtitle">故障工单流转记录</div>
+          <div id="faultTimeline" class="timeline">
+            <div class="timeline-item">系统初始化故障工单流程（草稿）</div>
+          </div>
+
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
             <button id="btnSaveFaultDraft" class="btn btn-primary">💾 保存/更新草稿</button>
@@ -1420,7 +1432,9 @@
     const btnSaveFaultDraft     = document.getElementById('btnSaveFaultDraft');
     const btnClearFault         = document.getElementById('btnClearFault');
     const btnSubmitFault        = document.getElementById('btnSubmitFault');
-    const faultListEl           = document.getElementById('faultList');
+       const faultListEl           = document.getElementById('faultList');
+    const faultTimelineEl       = document.getElementById('faultTimeline'); // 新增
+
 
     let currentFaultTicket = null;
     let faultTickets = [];
@@ -1458,8 +1472,23 @@
       clearFaultDeviceView();
       currentFaultTicket = null;
       setFaultStatus('草稿');
+      if (faultTimelineEl) {
+        faultTimelineEl.innerHTML = '<div class="timeline-item">系统初始化故障工单流程（草稿）</div>';
+      }
+    }
+    // 新增：故障工单流转记录追加
+    function appendFaultTimeline(text) {
+      if (!faultTimelineEl) return;
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      const nowStr = new Date().toLocaleString();
+      item.textContent = nowStr + ' - ' + text;
+      faultTimelineEl.appendChild(item);
+      faultTimelineEl.scrollTop = faultTimelineEl.scrollHeight;
     }
 
+
+    
     function saveFaultDraft() {
       const city = faultCity.value.trim();
       const county = faultCounty.value.trim();
@@ -1481,6 +1510,7 @@
           device: null,
           detail: {}
         };
+         appendFaultTimeline('创建故障工单草稿：' + faultNo);   // ★ 新增
       }
 
       currentFaultTicket.basic = {
@@ -1514,6 +1544,7 @@
       }
 
       setFaultStatus('草稿');
+      appendFaultTimeline('保存/更新故障工单草稿');           // ★ 新增
       alert('故障工单草稿已保存，可继续补充或修改后再提交。');
       renderFaultList();
     }
@@ -1630,6 +1661,8 @@
       saveFaultDraft(); // 确保最新内容写入
       currentFaultTicket.status = '已提交';
       setFaultStatus('已提交');
+            appendFaultTimeline('提交生成故障工单：' + currentFaultTicket.faultNo); // ★ 新增
+
       faultTickets = faultTickets.filter(t => t.faultNo !== currentFaultTicket.faultNo);
       faultTickets.unshift({ ...currentFaultTicket });
       alert('故障工单已提交，后续可在后台进行派单处理与闭环跟踪。');
@@ -1786,18 +1819,22 @@
       renderOrderList();
     });
 
-    // ============== 订单列表渲染 ==============
+      // ============== 订单列表渲染（含调拨订单 + 故障工单） ==============
     function renderOrderList() {
       orderListEl.innerHTML = '';
-      if (!orderHistory.length) {
+      const hasTransfer = orderHistory.length > 0;
+      const hasFault    = faultTickets.length > 0;
+
+      if (!hasTransfer && !hasFault) {
         const div = document.createElement('div');
         div.style.fontSize = '11px';
         div.style.color = '#9ca3af';
-        div.textContent = '暂无历史订单，请先在“调拨出入库”页创建并操作一个订单。';
+        div.textContent = '暂无订单/工单，请先在“调拨出入库”或“故障终端”页创建。';
         orderListEl.appendChild(div);
         return;
       }
 
+      // 1）调拨出入库订单
       orderHistory.forEach(order => {
         const item = document.createElement('div');
         item.className = 'order-item';
@@ -1812,7 +1849,7 @@
         const statusSpan = document.createElement('span');
         statusSpan.className = 'badge-status';
         statusSpan.textContent = order.status;
-        if (order.status === '草稿') statusSpan.classList.add('badge-draft');
+        if (order.status === '草稿')   statusSpan.classList.add('badge-draft');
         if (order.status === '待审批') statusSpan.classList.add('badge-pending');
         if (order.status === '已通过') statusSpan.classList.add('badge-pass');
         if (order.status === '已驳回') statusSpan.classList.add('badge-reject');
@@ -1842,7 +1879,7 @@
         tagRow.style.marginTop = '4px';
         const tag = document.createElement('span');
         tag.className = 'tag';
-        tag.textContent = '点击回填到当前订单';
+        tag.textContent = '【调拨】点击回填到当前订单';
         tagRow.appendChild(tag);
 
         item.appendChild(header);
@@ -1853,16 +1890,102 @@
         item.addEventListener('click', () => {
           currentOrder = { ...order };
           fieldOrderType.value = order.type;
-          fieldOrderNo.value = order.orderNo;
+          fieldOrderNo.value   = order.orderNo;
           fieldFromStore.value = order.fromStore;
-          fieldToStore.value = order.toStore;
-          fieldCreator.value = order.creator;
-          fieldPhone.value = order.phone || '';
-          fieldRemark.value = order.remark || '';
+          fieldToStore.value   = order.toStore;
+          fieldCreator.value   = order.creator;
+          fieldPhone.value     = order.phone || '';
+          fieldRemark.value    = order.remark || '';
           setOrderStatus(order.status);
           renderDeviceList();
           appendTimeline('从订单列表回填订单：' + order.orderNo);
           document.querySelector('.tab-item[data-view="transfer"]').click();
+        });
+
+        orderListEl.appendChild(item);
+      });
+
+      // 2）故障终端工单
+      faultTickets.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'order-item';
+
+        const header = document.createElement('div');
+        header.className = 'order-header';
+
+        const title = document.createElement('div');
+        title.className = 'order-title';
+        title.textContent = t.faultNo;
+
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'badge-status';
+        statusSpan.textContent = t.status;
+        if (t.status === '草稿')   statusSpan.classList.add('badge-draft');
+        if (t.status === '已提交') statusSpan.classList.add('badge-pass');
+
+        header.appendChild(title);
+        header.appendChild(statusSpan);
+
+        const meta1 = document.createElement('div');
+        meta1.className = 'order-meta';
+        const left1 = document.createElement('span');
+        left1.textContent = '故障类型：' + (t.detail?.type || '未知');
+        const right1 = document.createElement('span');
+        right1.textContent = t.basic?.city + ' · ' + t.basic?.county;
+        meta1.appendChild(left1);
+        meta1.appendChild(right1);
+
+        const meta2 = document.createElement('div');
+        meta2.className = 'order-meta';
+        const left2 = document.createElement('span');
+        left2.textContent = '反馈人：' + (t.basic?.reporter || '');
+        const right2 = document.createElement('span');
+        right2.textContent = t.device?.sn || '未关联终端';
+        meta2.appendChild(left2);
+        meta2.appendChild(right2);
+
+        const tagRow = document.createElement('div');
+        tagRow.style.marginTop = '4px';
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = '【故障】点击回填到故障工单';
+        tagRow.appendChild(tag);
+
+        item.appendChild(header);
+        item.appendChild(meta1);
+        item.appendChild(meta2);
+        item.appendChild(tagRow);
+
+        // 回填到故障终端闭环管理页（仅草稿支持修改）
+        item.addEventListener('click', () => {
+          currentFaultTicket = { ...t };
+          faultNoInput.value    = t.faultNo;
+          faultSource.value     = t.basic.source;
+          faultCity.value       = t.basic.city;
+          faultCounty.value     = t.basic.county;
+          faultReporter.value   = t.basic.reporter;
+          faultPhone.value      = t.basic.phone || '';
+          faultType.value       = t.detail.type;
+          faultLevel.value      = t.detail.level || '一般';
+          faultDesc.value       = t.detail.desc;
+          faultUsage.value      = t.detail.usage || '';
+          setFaultStatus(t.status);
+
+          if (t.device) {
+            faultDevCode.textContent     = t.device.code;
+            faultDevSn.textContent       = t.device.sn;
+            faultDevType.textContent     = t.device.type;
+            faultDevVendor.textContent   = t.device.vendor;
+            faultDevModel.textContent    = t.device.model;
+            faultDevInTime.textContent   = t.device.inTime;
+            faultDevStatus.textContent   = t.device.status;
+            faultDevLocation.textContent = t.device.location;
+          } else {
+            clearFaultDeviceView();
+          }
+
+          // 切换到底部“故障终端”Tab
+          document.querySelector('.tab-item[data-view="fault"]').click();
         });
 
         orderListEl.appendChild(item);
