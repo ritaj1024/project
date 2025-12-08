@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>首页</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #e5e7eb;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .phone-frame {
+      width: 390px;
+      max-width: 100%;
+      height: 780px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 头部 */
+    header {
+      padding: 10px 14px 8px;
+      background: radial-gradient(circle at 0 0, #38bdf8, #2563eb);
+      color: #f9fafb;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-title {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .header-sub {
+      font-size: 11px;
+      margin-top: 4px;
+      opacity: .9;
+    }
+    .header-tags {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .header-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(191,219,254,.7);
+      background: rgba(15,23,42,.15);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    main {
+      flex: 1;
+      background: #f3f4f6;
+      padding: 10px 12px 12px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .card-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    /* 核心入口 */
+    .entry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+    }
+    .entry-card {
+      border-radius: 12px;
+      padding: 10px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform .1s ease-out, box-shadow .1s ease-out;
+    }
+    .entry-card:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+    .entry-card.transfer {
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+    }
+    .entry-card.fault {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+    }
+    .entry-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .entry-title {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .entry-icon {
+      font-size: 18px;
+    }
+    .entry-sub {
+      font-size: 10px;
+      color: #4b5563;
+    }
+    .entry-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .entry-pill {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.08);
+      color: #1d4ed8;
+    }
+    .entry-pill-warn {
+      background: rgba(251,191,36,0.15);
+      color: #92400e;
+    }
+
+    /* 今日概况 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 6px;
+    }
+    .kpi-item {
+      border-radius: 10px;
+      padding: 6px 6px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      font-size: 10px;
+    }
+    .kpi-label {
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+    .kpi-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .kpi-sub {
+      margin-top: 2px;
+      font-size: 9px;
+      color: #16a34a;
+    }
+    .kpi-sub-warn {
+      color: #f97316;
+    }
+
+    /* 快捷入口 */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 6px;
+    }
+    .quick-item {
+      border-radius: 10px;
+      padding: 6px 4px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+    }
+    .quick-icon {
+      font-size: 18px;
+    }
+    .quick-label {
+      text-align: center;
+      color: #4b5563;
+    }
+
+    footer {
+      height: 40px;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      font-size: 10px;
+      color: #6b7280;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 4px rgba(34,197,94,0.8);
+    }
+    .footer-link {
+      color: #2563eb;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .fade-in { animation: fade-in .2s ease-out; }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+.entry-flex {
+  display: flex;
+  gap: 10px;
+}
+
+.entry-box {
+  flex: 1;
+  border-radius: 12px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+}
+
+.entry-blue {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+
+.entry-yellow {
+  background: #fef7e7;
+  border: 1px solid #fde68a;
+}
+
+.entry-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.entry-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.entry-sub {
+  font-size: 11px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <!-- 顶部 -->
+    <header>
+      <div class="header-row">
+        <div>
+          <div class="header-title">首页</div>
+       
+        </div>
+        <div style="font-size:20px;opacity:.9;">⋮</div>
+      </div>
+    
+    </header>
+
+    <!-- 内容区 -->
+    <main class="fade-in">
+      <!-- 装维一站式入口（仅结构） -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">装维一站式终端入口</div>
+          <div class="card-tag">装维 · 仓库 · 运维</div>
+        </div>
+
+      <div class="entry-flex">
+          <!-- 调拨 -->
+      <div class="entry-box entry-blue" id="entryTransfer">
+    <div class="entry-icon">🔁</div>
+    <div class="entry-title">调拨出入库</div>
+    <div class="entry-sub">订单创建 · 扫码添加 · 审批确认</div>
+  </div>
+
+          <!-- 故障 -->
+ <div class="entry-box entry-yellow" id="entryFault">
+    <div class="entry-icon">🛠</div>
+    <div class="entry-title">故障终端闭环管理</div>
+    <div class="entry-sub">故障工单 · 扫码关联 · 闭环跟踪</div>
+
+    
+  </div>
+
+        </div>
+        
+      </section>
+
+      <!-- 今日概况（示意数据） -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">今日概况（示意）</div>
+          <div class="card-tag">接口回填</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-item">
+            <div class="kpi-label">调拨订单</div>
+            <div class="kpi-value">12 单</div>
+            <div class="kpi-sub">出库完成率 91%</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-label">扫码设备</div>
+            <div class="kpi-value">86 台</div>
+            <div class="kpi-sub">串码一致率 99%</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-label">故障工单</div>
+            <div class="kpi-value">7 单</div>
+            <div class="kpi-sub kpi-sub-warn">闭环率 71%</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 快捷入口 -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">快捷入口</div>
+          <div class="card-tag">常用操作</div>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-item" id="quickScan">
+            <div class="quick-icon">📷</div>
+            <div class="quick-label">扫码识别</div>
+          </div>
+          <div class="quick-item" id="quickTransferList">
+            <div class="quick-icon">📋</div>
+            <div class="quick-label">调拨订单</div>
+          </div>
+          <div class="quick-item" id="quickFaultList">
+            <div class="quick-icon">⚠️</div>
+            <div class="quick-label">故障工单</div>
+          </div>
+          <div class="quick-item" id="quickProfile">
+            <div class="quick-icon">👤</div>
+            <div class="quick-label">我的</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底部 -->
+    <footer>
+     
+   
+
+  <script>
+    // 占位交互：你可以改为真实页面跳转
+    function go(msg) {
+      alert(msg + '\\n(在正式环境中替换为页面跳转即可)');
+    }
+    document.getElementById('entryTransfer').onclick    = () => go('进入【调拨出入库】');
+    document.getElementById('entryFault').onclick       = () => go('进入【故障终端闭环管理】');
+    document.getElementById('quickScan').onclick        = () => go('直接拉起【扫码识别】');
+    document.getElementById('quickTransferList').onclick= () => go('查看【调拨订单列表】');
+    document.getElementById('quickFaultList').onclick   = () => go('查看【故障工单列表】');
+    document.getElementById('quickProfile').onclick     = () => go('进入【我的】');
+    document.getElementById('footerGoto').onclick       = () => go('跳转至调拨/故障业务页面');
+  </script>
+</body>
+</html>
