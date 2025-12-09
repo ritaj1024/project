@@ -736,72 +736,72 @@
     {
       id: 1,
       bizType: '调拨出库',
-      bizOrderNo: 'DBDD202412050930',
+      bizOrderNo: 'DBDD202512050930',
       sn: 'SKYWA8EFF0AD',
       scanResult: '成功',
       matchResult: '已匹配台账',
       description: '校验通过，加入调拨出库订单。',
       operator: '张三 / 1008611',
       source: '装维APP',
-      opTime: '2024-12-05 09:30:21',
+      opTime: '2025-12-05 09:30:21',
       duration: 128,
-      reqId: 'REQ-20241205-0001',
+      reqId: 'REQ-20251205-0001',
       raw: {
-        request: { url: '/api/scan/dispatch-out', sn: 'SKYWA8EFF0AD', orderNo: 'DBDD202412050930' },
+        request: { url: '/api/scan/dispatch-out', sn: 'SKYWA8EFF0AD', orderNo: 'DBDD202512050930' },
         response: { code: 0, msg: 'OK', match: true }
       }
     },
     {
       id: 2,
       bizType: '调拨出库',
-      bizOrderNo: 'DBDD202412050930',
+      bizOrderNo: 'DBDD202512050930',
       sn: 'SN2233445566',
       scanResult: '台账无记录',
       matchResult: '系统无台账记录',
       description: '未在终端台账中找到匹配串码。',
       operator: '张三 / 1008611',
       source: '装维APP',
-      opTime: '2024-12-05 09:30:32',
+      opTime: '2025-12-05 09:30:32',
       duration: 156,
-      reqId: 'REQ-20241205-0002',
+      reqId: 'REQ-20251205-0002',
       raw: {
-        request: { url: '/api/scan/dispatch-out', sn: 'SN2233445566', orderNo: 'DBDD202412050930' },
+        request: { url: '/api/scan/dispatch-out', sn: 'SN2233445566', orderNo: 'DBDD202512050930' },
         response: { code: 1001, msg: 'SN not found in catalog' }
       }
     },
     {
       id: 3,
       bizType: '调拨入库',
-      bizOrderNo: 'DBDD202412041530',
+      bizOrderNo: 'DBDD202512041530',
       sn: 'SKYWA8EFF0AD',
       scanResult: '成功',
       matchResult: '已匹配台账',
       description: '校验通过，加入调拨入库订单',
       operator: '李四 / 1008612',
       source: '装维APP',
-      opTime: '2024-12-04 13:14:09',
+      opTime: '2025-12-04 13:14:09',
       duration: 102,
-      reqId: 'REQ-20241204-0001',
+      reqId: 'REQ-20251204-0001',
       raw: {
-        request: { url: '/api/scan/dispatch-in', sn: 'SKYWA8EFF0AD', orderNo: 'DBDD202412041530' },
+        request: { url: '/api/scan/dispatch-in', sn: 'SKYWA8EFF0AD', orderNo: 'DBDD202512041530' },
         response: {  code: 0, msg: 'OK', match: true  }
       }
     },
     {
       id: 4,
       bizType: '调拨出库',
-      bizOrderNo: 'ZJDD202412031110',
+      bizOrderNo: 'ZJDD202512031110',
       sn: 'SN0000000000',
       scanResult: '校验失败',
       matchResult: '串码与终端类型不符',
       description: '装机工单要求“光猫”，当前串码台账终端类型为“机顶盒”，校验不通过。',
       operator: '王五 / 1008613',
       source: '装维APP',
-      opTime: '2024-12-03 11:10:05',
+      opTime: '2025-12-03 11:10:05',
       duration: 210,
-      reqId: 'REQ-20241203-0009',
+      reqId: 'REQ-20251203-0009',
       raw: {
-        request: { url: '/api/scan/dispatch-out', sn: 'SN0000000000', orderNo: 'ZJDD202412031110' },
+        request: { url: '/api/scan/dispatch-out', sn: 'SN0000000000', orderNo: 'ZJDD202512031110' },
         response: { code: 1003, msg: 'Device type mismatch' }
       }
     }
@@ -1057,7 +1057,7 @@
   const faultRows = [
     {
       id: 1,
-      faultNo: 'GZGD202412050930',
+      faultNo: 'GZGD202512050930',
       status: '已提交',
       source: '装维APP反馈',
       city: '内蒙古·呼和浩特市',
@@ -1067,12 +1067,12 @@
       deviceSn: 'SKYWA8EFF0AD',
       deviceType: '光猫-家庭网关',
       reporter: '李四 / 1008622',
-      createTime: '2024-12-05 09:45:10',
+      createTime: '2025-12-05 09:45:10',
       photoCount: 2
     },
     {
       id: 2,
-      faultNo: 'GZGD202412041530',
+      faultNo: 'GZGD202512041530',
       status: '草稿',
       source: '客户投诉',
       city: '内蒙古·包头市',
@@ -1082,12 +1082,12 @@
       deviceSn: 'SN1234567890',
       deviceType: '光猫',
       reporter: '王六 / 1008633',
-      createTime: '2024-12-04 15:32:21',
+      createTime: '2025-12-04 15:32:21',
       photoCount: 1
     },
     {
       id: 3,
-      faultNo: 'GZGD202412031110',
+      faultNo: 'GZGD202512031110',
       status: '已提交',
       source: '质检抽测',
       city: '内蒙古·呼和浩特市',
@@ -1097,7 +1097,7 @@
       deviceSn: 'SN0000000000',
       deviceType: '光猫-家庭网关',
       reporter: '张三 / 1008611',
-      createTime: '2024-12-03 11:20:05',
+      createTime: '2025-12-03 11:20:05',
       photoCount: 3
     }
   ];
